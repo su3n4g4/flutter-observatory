@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'chapters/ch1/ch1_catalog_page.dart';
-import 'chapters/ch2/ch2_catalog_page.dart';
-import 'chapters/ch3/ch3_catalog_page.dart';
+import 'ch3_p1_rebuild_scheduling_page.dart';
 
-class RootCatalogPage extends StatelessWidget {
-  const RootCatalogPage({super.key});
+class Ch3CatalogPage extends StatelessWidget {
+  const Ch3CatalogPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,17 +25,15 @@ class RootCatalogPage extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Element Tree Lab')),
+      appBar: AppBar(title: const Text('Element Tree Lab - Ch3')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('章を選択してください。'),
+            const Text('目的：再構築スケジューリングを観測し、dirty 登録と frame 単位の rebuild を確認する。'),
             const SizedBox(height: 16),
-            navButton('Chapter 1: Element Tree', const Ch1CatalogPage()),
-            navButton('Chapter 2: Lifecycle', const Ch2CatalogPage()),
-            navButton('Chapter 3: Rebuild Scheduling', const Ch3CatalogPage()),
+            navButton('P1: setState と Build Scheduling', const Ch3P1RebuildSchedulingPage()),
           ],
         ),
       ),
