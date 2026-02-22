@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'chapters/ch1/ch1_catalog_page.dart';
-import 'chapters/ch2/ch2_catalog_page.dart';
-import 'chapters/ch3/ch3_catalog_page.dart';
-import 'chapters/ch4/ch4_catalog_page.dart';
+import 'ch4_p1_identity_management_page.dart';
 
-class RootCatalogPage extends StatelessWidget {
-  const RootCatalogPage({super.key});
+class Ch4CatalogPage extends StatelessWidget {
+  const Ch4CatalogPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,18 +25,15 @@ class RootCatalogPage extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Element Tree Lab')),
+      appBar: AppBar(title: const Text('Element Tree Lab - Ch4')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('章を選択してください。'),
+            const Text('目的：Element の同一性管理を Key 中心に観測する。'),
             const SizedBox(height: 16),
-            navButton('Chapter 1: Element Tree', const Ch1CatalogPage()),
-            navButton('Chapter 2: Lifecycle', const Ch2CatalogPage()),
-            navButton('Chapter 3: Rebuild Scheduling', const Ch3CatalogPage()),
-            navButton('Chapter 4: Identity Management', const Ch4CatalogPage()),
+            navButton('P1: 同一性管理（Key / GlobalKey）', const Ch4P1IdentityManagementPage()),
           ],
         ),
       ),
