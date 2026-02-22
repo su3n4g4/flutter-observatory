@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'chapters/ch1/ch1_catalog_page.dart';
-import 'chapters/ch2/ch2_catalog_page.dart';
-import 'chapters/ch3/ch3_catalog_page.dart';
-import 'chapters/ch4/ch4_catalog_page.dart';
-import 'chapters/ch5/ch5_catalog_page.dart';
+import 'ch5_p1_dependency_notification_page.dart';
 
-class RootCatalogPage extends StatelessWidget {
-  const RootCatalogPage({super.key});
+class Ch5CatalogPage extends StatelessWidget {
+  const Ch5CatalogPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,19 +25,15 @@ class RootCatalogPage extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Element Tree Lab')),
+      appBar: AppBar(title: const Text('Element Tree Lab - Ch5')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('章を選択してください。'),
+            const Text('目的：依存関係と通知バブルアップの挙動を観測する。'),
             const SizedBox(height: 16),
-            navButton('Chapter 1: Element Tree', const Ch1CatalogPage()),
-            navButton('Chapter 2: Lifecycle', const Ch2CatalogPage()),
-            navButton('Chapter 3: Rebuild Scheduling', const Ch3CatalogPage()),
-            navButton('Chapter 4: Identity Management', const Ch4CatalogPage()),
-            navButton('Chapter 5: Dependency & Notification', const Ch5CatalogPage()),
+            navButton('P1: 依存・通知管理', const Ch5P1DependencyNotificationPage()),
           ],
         ),
       ),
