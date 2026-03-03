@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class InheritedOnlyPage extends StatefulWidget {
-  const InheritedOnlyPage({super.key});
+class InheritedPage extends StatefulWidget {
+  const InheritedPage({super.key});
 
   @override
-  State<InheritedOnlyPage> createState() => _InheritedOnlyPageState();
+  State<InheritedPage> createState() => _InheritedPageState();
 }
 
-class _InheritedOnlyPageState extends State<InheritedOnlyPage> {
+class _InheritedPageState extends State<InheritedPage> {
   int inheritedValue = 0;
 
   void _increment() => setState(() => inheritedValue += 1);
@@ -17,7 +17,7 @@ class _InheritedOnlyPageState extends State<InheritedOnlyPage> {
     debugPrint('[BUILD] page');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Inherited only')),
+      appBar: AppBar(title: const Text('Inherited')),
       body: _DependencyScope(
         value: inheritedValue,
         child: Padding(

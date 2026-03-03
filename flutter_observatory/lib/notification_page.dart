@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class NotificationOnlyPage extends StatefulWidget {
-  const NotificationOnlyPage({super.key});
+class NotificationPage extends StatefulWidget {
+  const NotificationPage({super.key});
 
   @override
-  State<NotificationOnlyPage> createState() => _NotificationOnlyPageState();
+  State<NotificationPage> createState() => _NotificationPageState();
 }
 
-class _NotificationOnlyPageState extends State<NotificationOnlyPage> {
+class _NotificationPageState extends State<NotificationPage> {
   int count = 0;
 
   @override
@@ -15,7 +15,7 @@ class _NotificationOnlyPageState extends State<NotificationOnlyPage> {
     debugPrint('[BUILD] page');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Notification only')),
+      appBar: AppBar(title: const Text('Notification')),
       body: NotificationListener<_DemoNotification>(
         onNotification: (n) {
           debugPrint('[NOTIFICATION] received: ${n.message}');
