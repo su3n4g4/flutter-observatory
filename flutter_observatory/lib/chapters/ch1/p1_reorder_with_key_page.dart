@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'probe.dart';
+
+import 'state_tracker.dart';
 
 class P1ReorderWithKeyPage extends StatefulWidget {
   const P1ReorderWithKeyPage({super.key});
@@ -25,7 +26,7 @@ class _P1ReorderWithKeyPageState extends State<P1ReorderWithKeyPage> {
             child: const Text('Reverse'),
           ),
           const Divider(),
-          for (final s in labels) Probe(s, key: ValueKey(s)),
+          for (final s in labels) StateTracker(s, key: ValueKey(s)),
         ],
       ),
     );

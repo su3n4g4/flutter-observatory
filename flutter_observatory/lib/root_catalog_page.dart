@@ -32,7 +32,7 @@ class RootCatalogPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Element Tree Lab')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -46,7 +46,6 @@ class RootCatalogPage extends StatelessWidget {
             navButton('Chapter 5: Dependency & Notification', const Ch5CatalogPage()),
             navButton('InheritedPage', const InheritedPage()),
             navButton('NotificationPage', const NotificationPage()),
-            
           ],
         ),
       ),
