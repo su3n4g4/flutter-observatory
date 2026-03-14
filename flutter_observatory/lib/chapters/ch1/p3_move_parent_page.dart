@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'state_tracker.dart';
+import '../../widgets/state_tracker.dart';
 
 class P3MoveParentPage extends StatefulWidget {
   const P3MoveParentPage({super.key});
@@ -77,7 +77,7 @@ class _ParentBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: active
             ? Theme.of(context).colorScheme.primaryContainer
-            : Theme.of(context).colorScheme.surfaceVariant,
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border.all(
           color: active
               ? Theme.of(context).colorScheme.primary

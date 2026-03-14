@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import '../../widgets/state_tracker.dart';
 
 class Ch3P1RebuildSchedulingPage extends StatefulWidget {
   const Ch3P1RebuildSchedulingPage({super.key});
@@ -85,7 +86,14 @@ class _Ch3P1RebuildSchedulingPageState extends State<Ch3P1RebuildSchedulingPage>
             Text('syncActionCount: $syncActionCount'),
             Text('asyncActionCount: $asyncActionCount'),
             const SizedBox(height: 12),
-            const _BuildOrderProbeTree(),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                StateTracker('child-A'),
+                SizedBox(height: 8),
+                StateTracker('child-B'),
+              ],
+            ),
             const SizedBox(height: 12),
             const Text(
               '観測ポイント\n'
@@ -100,30 +108,3 @@ class _Ch3P1RebuildSchedulingPageState extends State<Ch3P1RebuildSchedulingPage>
   }
 }
 
-class _BuildOrderProbeTree extends StatelessWidget {
-  const _BuildOrderProbeTree();
-
-  @override
-  Widget build(BuildContext context) {
-    debugPrint('[BUILD] tree root');
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _BuildLeaf(label: 'child-A'),
-        _BuildLeaf(label: 'child-B'),
-      ],
-    );
-  }
-}
-
-class _BuildLeaf extends StatelessWidget {
-  const _BuildLeaf({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    debugPrint('[BUILD] $label');
-    return Text('probe: $label');
-  }
-}

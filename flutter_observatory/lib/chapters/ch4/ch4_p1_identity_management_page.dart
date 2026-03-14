@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/state_tracker.dart';
 
 class Ch4P1IdentityManagementPage extends StatefulWidget {
   const Ch4P1IdentityManagementPage({super.key});
@@ -13,9 +14,7 @@ class _Ch4P1IdentityManagementPageState extends State<Ch4P1IdentityManagementPag
   bool placeGlobalInTop = true;
   final List<String> labels = ['A', 'B', 'C'];
 
-  final GlobalKey<_GlobalProbeCardState> probeKey = GlobalKey<_GlobalProbeCardState>(
-    debugLabel: 'ch4-global-probe',
-  );
+  final GlobalKey probeKey = GlobalKey(debugLabel: 'ch4-global-probe');
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +84,7 @@ class _Ch4P1IdentityManagementPageState extends State<Ch4P1IdentityManagementPag
             _Slot(
               title: 'Top Slot',
               child: placeGlobalInTop
-                  ? _GlobalProbeCard(key: probeKey, label: 'GLOBAL-KEYED')
+                  ? StateTracker('GLOBAL-KEYED', key: probeKey)
                   : const SizedBox.shrink(),
             ),
             const SizedBox(height: 12),
@@ -93,7 +92,7 @@ class _Ch4P1IdentityManagementPageState extends State<Ch4P1IdentityManagementPag
               title: 'Bottom Slot',
               child: placeGlobalInTop
                   ? const SizedBox.shrink()
-                  : _GlobalProbeCard(key: probeKey, label: 'GLOBAL-KEYED'),
+                  : StateTracker('GLOBAL-KEYED', key: probeKey),
             ),
             const SizedBox(height: 8),
             const Text('ログで deactivate/activate と state の同一性を確認してください。'),
@@ -137,52 +136,6 @@ class _IdentityRowState extends State<_IdentityRow> {
           onPressed: () => setState(() => count += 1),
           icon: const Icon(Icons.add),
         ),
-      ),
-    );
-  }
-}
-
-class _GlobalProbeCard extends StatefulWidget {
-  const _GlobalProbeCard({required this.label, super.key});
-
-  final String label;
-
-  @override
-  State<_GlobalProbeCard> createState() => _GlobalProbeCardState();
-}
-
-class _GlobalProbeCardState extends State<_GlobalProbeCard> {
-  @override
-  void initState() {
-    super.initState();
-    debugPrint('[GLOBAL] initState state=$hashCode');
-  }
-
-  @override
-  void deactivate() {
-    super.deactivate();
-    debugPrint('[GLOBAL] deactivate state=$hashCode');
-  }
-
-  @override
-  void activate() {
-    super.activate();
-    debugPrint('[GLOBAL] activate state=$hashCode');
-  }
-
-  @override
-  void dispose() {
-    debugPrint('[GLOBAL] dispose state=$hashCode');
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    debugPrint('[GLOBAL] build state=$hashCode context=$context');
-    return Card(
-      color: Colors.indigo.shade50,
-      child: ListTile(
-        title: Text('${widget.label} / state=$hashCode'),
       ),
     );
   }

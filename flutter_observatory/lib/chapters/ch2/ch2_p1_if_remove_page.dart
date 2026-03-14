@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'lifecycle_probe.dart';
+import '../../widgets/state_tracker.dart';
 
 class Ch2P1IfRemovePage extends StatefulWidget {
   const Ch2P1IfRemovePage({super.key});
@@ -31,7 +31,7 @@ class _Ch2P1IfRemovePageState extends State<Ch2P1IfRemovePage> {
             ),
             const Divider(height: 32),
             if (showChild)
-              const LifecycleProbe('IF-CHILD')
+              const StateTracker('IF-CHILD')
             else
               const Text('いま子はツリーに存在しません（ここで dispose が出る）'),
           ],

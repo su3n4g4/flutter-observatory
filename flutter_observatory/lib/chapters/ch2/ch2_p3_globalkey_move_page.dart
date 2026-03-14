@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'lifecycle_probe.dart';
+import '../../widgets/state_tracker.dart';
 
 class Ch2P3GlobalKeyMovePage extends StatefulWidget {
   const Ch2P3GlobalKeyMovePage({super.key});
@@ -17,7 +17,7 @@ class _Ch2P3GlobalKeyMovePageState extends State<Ch2P3GlobalKeyMovePage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget keyedProbe() => LifecycleProbe('GLOBAL-KEYED', key: _probeKey);
+    Widget keyedProbe() => StateTracker('GLOBAL-KEYED', key: _probeKey);
 
     return Scaffold(
       appBar: AppBar(title: const Text('P3: GlobalKey で移動')),

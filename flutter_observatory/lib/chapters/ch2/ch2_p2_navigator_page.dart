@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'lifecycle_probe.dart';
+import '../../widgets/state_tracker.dart';
 
 class Ch2P2NavigatorPage extends StatelessWidget {
   const Ch2P2NavigatorPage({super.key});
@@ -73,7 +73,7 @@ class _SecondRoutePageState extends State<_SecondRoutePage> {
               '下の Probe の dispose も確認する。',
             ),
             const SizedBox(height: 12),
-            const LifecycleProbe('SECOND-ROUTE-CHILD'),
+            const StateTracker('SECOND-ROUTE-CHILD'),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),

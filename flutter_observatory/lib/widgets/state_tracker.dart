@@ -29,6 +29,20 @@ class _StateTrackerState extends State<StateTracker> {
   }
 
   @override
+  void deactivate() {
+    super.deactivate();
+    _lastEvent = 'deactivated';
+    debugPrint('deactivate: ${widget.label}  state=$hashCode');
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    _lastEvent = 'activated';
+    debugPrint('activate: ${widget.label}  state=$hashCode');
+  }
+
+  @override
   void dispose() {
     debugPrint('dispose: ${widget.label}  state=$hashCode');
     super.dispose();

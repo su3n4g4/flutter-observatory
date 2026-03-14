@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'state_tracker.dart';
+import '../../widgets/state_tracker.dart';
 
 class P2ConditionalPage extends StatefulWidget {
   const P2ConditionalPage({super.key});
