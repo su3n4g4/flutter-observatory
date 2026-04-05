@@ -59,7 +59,7 @@ class _Ch3P1RebuildSchedulingPageState extends State<Ch3P1RebuildSchedulingPage>
 
     return Scaffold(
       appBar: AppBar(title: const Text('Ch3 P1: 再構築スケジューリング')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -90,7 +90,7 @@ class _Ch3P1RebuildSchedulingPageState extends State<Ch3P1RebuildSchedulingPage>
             Text('syncActionCount: $syncActionCount'),
             Text('asyncActionCount: $asyncActionCount'),
             const SizedBox(height: 12),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 StateTracker('child-A'),
