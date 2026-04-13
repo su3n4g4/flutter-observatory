@@ -18,21 +18,17 @@ class _Ch3P1RebuildSchedulingPageState extends State<Ch3P1RebuildSchedulingPage>
   @override
   void initState() {
     super.initState();
-    // フレーム開始（毎フレーム自動で呼ばれる）
-    SchedulerBinding.instance.addPersistentFrameCallback((_) {
-      if (!mounted) return;
-      frameCount += 1;
-      debugPrint('[FRAME BEGIN] #$frameCount');
-    });
-    // フレーム完了（1回限りなので再帰的に再登録）
-    _scheduleFrameEndProbe();
+    _scheduleFrameProbe();
   }
 
-  void _scheduleFrameEndProbe() {
+  void _scheduleFrameProbe() {
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      debugPrint('[FRAME END] #$frameCount');
-      _scheduleFrameEndProbe();
+      if (!mounted) {
+        return;
+      }
+      frameCount += 1;
+      debugPrint('[FRAME] drawFrame completed: #$frameCount');
+      _scheduleFrameProbe();
     });
   }
 
@@ -111,4 +107,3 @@ class _Ch3P1RebuildSchedulingPageState extends State<Ch3P1RebuildSchedulingPage>
     );
   }
 }
-
