@@ -148,6 +148,7 @@ class _DependencyScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_DependencyScope oldWidget) {
+    debugPrint('[Inherited] updateShouldNotify old=${oldWidget.value} new=$value');
     return value != oldWidget.value;
   }
 }
