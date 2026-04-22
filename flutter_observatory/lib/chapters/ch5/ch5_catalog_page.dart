@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'ch5_p1_dependency_notification_page.dart';
+import 'ch5_p1_inherited_dependency_page.dart';
+import 'ch5_p2_notification_bubble_page.dart';
 
 class Ch5CatalogPage extends StatelessWidget {
   const Ch5CatalogPage({super.key});
@@ -33,7 +34,14 @@ class Ch5CatalogPage extends StatelessWidget {
           children: [
             const Text('目的：依存関係と通知バブルアップの挙動を観測する。'),
             const SizedBox(height: 16),
-            navButton('P1: 依存・通知管理', const Ch5P1DependencyNotificationPage()),
+            navButton(
+              'P1: InheritedWidget 依存',
+              const Ch5P1InheritedDependencyPage(),
+            ),
+            navButton(
+              'P2: Notification バブルアップ',
+              const Ch5P2NotificationBubblePage(),
+            ),
           ],
         ),
       ),

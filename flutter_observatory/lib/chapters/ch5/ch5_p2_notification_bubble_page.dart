@@ -1,0 +1,209 @@
+import 'package:flutter/material.dart';
+
+import '../../widgets/widget_box.dart';
+
+class Ch5P2NotificationBubblePage extends StatefulWidget {
+  const Ch5P2NotificationBubblePage({super.key});
+
+  @override
+  State<Ch5P2NotificationBubblePage> createState() =>
+      _Ch5P2NotificationBubblePageState();
+}
+
+class _Ch5P2NotificationBubblePageState
+    extends State<Ch5P2NotificationBubblePage> {
+  int notificationCount = 0;
+  int pageBuildCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    pageBuildCount += 1;
+    debugPrint('[BUILD] Ch5 P2 page (#$pageBuildCount)');
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Ch5 P2: Notification バブルアップ')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'この章で観測すること',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              '・Notification.dispatch はツリーを子から親へバブルアップする\n'
+              '・NotificationListener がバブルアップしてきた通知を捕捉する\n'
+              '・捕捉側で setState を呼ぶとページ全体が rebuild される（= P1 との対比）',
+              style: TextStyle(fontSize: 13),
+            ),
+            const Divider(height: 24),
+
+            WidgetBox(
+              kind: WidgetKind.stateful,
+              name: 'Ch5P2NotificationBubblePage',
+              role: 'ページ本体。onNotification で setState する',
+              badges: ['notificationCount: $notificationCount'],
+              buildCount: pageBuildCount,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    '↓ この下で NotificationListener が通知を待ち受ける',
+                    style: TextStyle(fontSize: 11, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 4),
+                  _VisualNotificationListener(
+                    onNotification: (notification) {
+                      debugPrint(
+                          '[NOTIFICATION] received: ${notification.message}');
+                      setState(() => notificationCount += 1);
+                      return true;
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: const [
+                        _NotificationDispatchLeaf(),
+                        _IndependentWidget(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+            const Text(
+              '起きる現象',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              '・ボタン押下で末端から Notification.dispatch\n'
+              '・ツリーを上へバブルアップし NotificationListener が捕捉\n'
+              '・onNotification 内で setState → Page が rebuild\n'
+              '・Page の子（dispatch Leaf も Independent も）すべて rebuild される\n'
+              '・P1 と違い「依存登録」に基づく選択的 rebuild ではない',
+              style: TextStyle(fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// NotificationListener の可視化ラッパー
+// ============================================================
+
+class _VisualNotificationListener extends StatefulWidget {
+  const _VisualNotificationListener({
+    required this.onNotification,
+    required this.child,
+  });
+  final bool Function(_DemoNotification) onNotification;
+  final Widget child;
+
+  @override
+  State<_VisualNotificationListener> createState() =>
+      _VisualNotificationListenerState();
+}
+
+class _VisualNotificationListenerState
+    extends State<_VisualNotificationListener> {
+  int buildCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    buildCount += 1;
+    return WidgetBox(
+      kind: WidgetKind.listener,
+      name: 'NotificationListener<_DemoNotification>',
+      role: 'バブルアップしてきた通知を捕捉する',
+      badges: const ['onNotification 内で setState'],
+      buildCount: buildCount,
+      child: NotificationListener<_DemoNotification>(
+        onNotification: widget.onNotification,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+// ============================================================
+// dispatchする末端Widget
+// ============================================================
+
+class _NotificationDispatchLeaf extends StatefulWidget {
+  const _NotificationDispatchLeaf();
+
+  @override
+  State<_NotificationDispatchLeaf> createState() =>
+      _NotificationDispatchLeafState();
+}
+
+class _NotificationDispatchLeafState extends State<_NotificationDispatchLeaf> {
+  int buildCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    buildCount += 1;
+    debugPrint('[BUILD] notification leaf (#$buildCount)');
+
+    return WidgetBox(
+      kind: WidgetKind.stateful,
+      name: '_NotificationDispatchLeaf',
+      role: 'Notification を dispatch する末端Widget',
+      badges: const ['dispatch する側'],
+      buildCount: buildCount,
+      child: FilledButton.tonal(
+        onPressed: () {
+          const _DemoNotification(message: 'leaf -> bubble').dispatch(context);
+        },
+        child: const Text('Notification.dispatch で親へ通知する'),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// 対照群：通知に関与しないWidget
+// ============================================================
+
+class _IndependentWidget extends StatefulWidget {
+  const _IndependentWidget();
+
+  @override
+  State<_IndependentWidget> createState() => _IndependentWidgetState();
+}
+
+class _IndependentWidgetState extends State<_IndependentWidget> {
+  int buildCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    buildCount += 1;
+    debugPrint('[BUILD] independent widget (#$buildCount)');
+
+    return WidgetBox(
+      kind: WidgetKind.stateful,
+      name: '_IndependentWidget',
+      role: '通知に関与しない対照群',
+      badges: const ['dispatch も listen もしない'],
+      buildCount: buildCount,
+      child: const Text('それでもページ全体の rebuild に巻き込まれる'),
+    );
+  }
+}
+
+// ============================================================
+// Notification 型
+// ============================================================
+
+class _DemoNotification extends Notification {
+  const _DemoNotification({required this.message});
+
+  final String message;
+}
