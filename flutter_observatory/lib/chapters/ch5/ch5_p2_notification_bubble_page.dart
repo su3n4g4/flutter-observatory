@@ -28,7 +28,12 @@ class _Ch5P2NotificationBubblePageState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'この章で観測すること',
+              '💡 枠が黄色く光る = build() が実行された証拠',
+              style: TextStyle(fontSize: 13, color: Colors.black54),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'この章で確認すること',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
@@ -40,6 +45,8 @@ class _Ch5P2NotificationBubblePageState
             ),
             const Divider(height: 24),
 
+            // ページ
+            _LayerLabel('ページ', color: Color(0xFF1976D2)),
             WidgetBox(
               kind: WidgetKind.stateful,
               name: 'Ch5P2NotificationBubblePage',
@@ -49,11 +56,8 @@ class _Ch5P2NotificationBubblePageState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    '↓ この下で NotificationListener が通知を待ち受ける',
-                    style: TextStyle(fontSize: 11, color: Colors.black54),
-                  ),
-                  const SizedBox(height: 4),
+                  // リスナー
+                  _LayerLabel('リスナー', color: Color(0xFFF57C00)),
                   _VisualNotificationListener(
                     onNotification: (notification) {
                       debugPrint(
@@ -63,7 +67,9 @@ class _Ch5P2NotificationBubblePageState
                     },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: const [
+                      children: [
+                        // 利用側
+                        _LayerLabel('利用側', color: Color(0xFF616161)),
                         _NotificationDispatchLeaf(),
                         _IndependentWidget(),
                       ],
@@ -122,7 +128,7 @@ class _VisualNotificationListenerState
       kind: WidgetKind.listener,
       name: 'NotificationListener<_DemoNotification>',
       role: 'バブルアップしてきた通知を捕捉する',
-      badges: const ['onNotification 内で setState'],
+      badges: const ['onNotification'],
       buildCount: buildCount,
       child: NotificationListener<_DemoNotification>(
         onNotification: widget.onNotification,
@@ -155,8 +161,8 @@ class _NotificationDispatchLeafState extends State<_NotificationDispatchLeaf> {
     return WidgetBox(
       kind: WidgetKind.stateful,
       name: '_NotificationDispatchLeaf',
-      role: 'Notification を dispatch する末端Widget',
-      badges: const ['dispatch する側'],
+      role: 'dispatch する',
+      badges: const ['dispatch: ✓'],
       buildCount: buildCount,
       child: FilledButton.tonal(
         onPressed: () {
@@ -190,10 +196,40 @@ class _IndependentWidgetState extends State<_IndependentWidget> {
     return WidgetBox(
       kind: WidgetKind.stateful,
       name: '_IndependentWidget',
-      role: '通知に関与しない対照群',
-      badges: const ['dispatch も listen もしない'],
+      role: 'dispatch しない',
+      badges: const ['dispatch: ✗'],
       buildCount: buildCount,
       child: const Text('それでもページ全体の rebuild に巻き込まれる'),
+    );
+  }
+}
+
+// ============================================================
+// 層ラベル
+// ============================================================
+
+class _LayerLabel extends StatelessWidget {
+  const _LayerLabel(this.label, {required this.color});
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: color, width: 3)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: color,
+          letterSpacing: 0.3,
+        ),
+      ),
     );
   }
 }

@@ -2,28 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../widgets/widget_box.dart';
 
-class Ch5P1InheritedDependencyPage extends StatefulWidget {
+class Ch5P1InheritedDependencyPage extends StatelessWidget {
   const Ch5P1InheritedDependencyPage({super.key});
 
   @override
-  State<Ch5P1InheritedDependencyPage> createState() =>
-      _Ch5P1InheritedDependencyPageState();
-}
-
-class _Ch5P1InheritedDependencyPageState
-    extends State<Ch5P1InheritedDependencyPage> {
-  int inheritedValue = 0;
-  int pageBuildCount = 0;
-
-  void _incrementInheritedValue() {
-    setState(() => inheritedValue += 1);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    pageBuildCount += 1;
-    debugPrint('[BUILD] Ch5 P1 page (#$pageBuildCount)');
-
     return Scaffold(
       appBar: AppBar(title: const Text('Ch5 P1: InheritedWidget 依存')),
       body: SingleChildScrollView(
@@ -47,36 +30,16 @@ class _Ch5P1InheritedDependencyPageState
               style: TextStyle(fontSize: 13),
             ),
             const Divider(height: 24),
-            FilledButton(
-              onPressed: _incrementInheritedValue,
-              child: const Text('value を更新する（_DependentWidget だけ rebuild される）'),
-            ),
-            const SizedBox(height: 16),
 
-            // ページ
-            _LayerLabel('ページ', color: Color(0xFF1976D2)),
-            WidgetBox(
-              kind: WidgetKind.stateful,
-              name: 'Ch5P1InheritedDependencyPage',
-              role: 'ページ本体。ボタン押下で setState する',
-              badges: ['inheritedValue: $inheritedValue'],
-              buildCount: pageBuildCount,
+            // スコープ
+            _LayerLabel('スコープ', color: Color(0xFF7B1FA2)),
+            _VisualDependencyScope(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // スコープ
-                  _LayerLabel('スコープ', color: Color(0xFF7B1FA2)),
-                  _VisualDependencyScope(
-                    value: inheritedValue,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _LayerLabel('利用側', color: Color(0xFF388E3C)),
-                        const _DependentWidget(),
-                        const _IndependentWidget(),
-                      ],
-                    ),
-                  ),
+                  _LayerLabel('利用側', color: Color(0xFF388E3C)),
+                  _DependentWidget(),
+                  _IndependentWidget(),
                 ],
               ),
             ),
@@ -88,8 +51,7 @@ class _Ch5P1InheritedDependencyPageState
             ),
             const SizedBox(height: 4),
             const Text(
-              '・ボタンを押すと Page が setState → rebuild\n'
-              '・Page の build で _DependencyScope の value が変わる\n'
+              '・ボタンを押すと _DependencyScope の value だけが変わる\n'
               '・_DependencyScope.updateShouldNotify が true を返す\n'
               '・of() を呼んでいた _DependentWidget だけ rebuild（光る）\n'
               '・_IndependentWidget は rebuild されない（光らない）',
@@ -106,11 +68,10 @@ class _Ch5P1InheritedDependencyPageState
 // InheritedWidget 本体と、その可視化用ラッパー
 // ============================================================
 
-/// InheritedWidget の存在を視覚化するためのラッパー。
-/// 本物の _DependencyScope を WidgetBox で包んで表示する。
+/// 値の管理とInheritedWidgetの可視化を担うラッパー。
+/// ページのsetStateを経由せず、このWidget内でのみ値を更新する。
 class _VisualDependencyScope extends StatefulWidget {
-  const _VisualDependencyScope({required this.value, required this.child});
-  final int value;
+  const _VisualDependencyScope({required this.child});
   final Widget child;
 
   @override
@@ -118,20 +79,37 @@ class _VisualDependencyScope extends StatefulWidget {
 }
 
 class _VisualDependencyScopeState extends State<_VisualDependencyScope> {
+  int value = 0;
   int buildCount = 0;
+
+  void _increment() {
+    setState(() => value += 1);
+  }
 
   @override
   Widget build(BuildContext context) {
     buildCount += 1;
+    debugPrint('[Scope] build (#$buildCount) value=$value');
     return WidgetBox(
       kind: WidgetKind.inherited,
       name: '_DependencyScope',
       role: 'value を公開する InheritedWidget。of() でアクセス可',
-      badges: const ['updateShouldNotify'],
+      badges: ['value: $value', 'updateShouldNotify'],
       buildCount: buildCount,
       child: _DependencyScope(
-        value: widget.value,
-        child: widget.child,
+        value: value,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 4),
+            FilledButton(
+              onPressed: _increment,
+              child: const Text('value を更新する（_DependentWidget だけ rebuild される）'),
+            ),
+            const SizedBox(height: 8),
+            widget.child,
+          ],
+        ),
       ),
     );
   }
@@ -188,36 +166,6 @@ class _DependentWidgetState extends State<_DependentWidget> {
 }
 
 // ============================================================
-// 層ラベル
-// ============================================================
-
-class _LayerLabel extends StatelessWidget {
-  const _LayerLabel(this.label, {required this.color});
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        border: Border(left: BorderSide(color: color, width: 3)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: color,
-          letterSpacing: 0.3,
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
 // 依存なしWidget
 // ============================================================
 
@@ -243,6 +191,36 @@ class _IndependentWidgetState extends State<_IndependentWidget> {
       badges: const ['dependOn: ✗'],
       buildCount: buildCount,
       child: const Text('InheritedWidget の更新は届かない'),
+    );
+  }
+}
+
+// ============================================================
+// 層ラベル
+// ============================================================
+
+class _LayerLabel extends StatelessWidget {
+  const _LayerLabel(this.label, {required this.color});
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: color, width: 3)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: color,
+          letterSpacing: 0.3,
+        ),
+      ),
     );
   }
 }

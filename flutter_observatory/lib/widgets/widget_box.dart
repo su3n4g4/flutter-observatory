@@ -29,7 +29,7 @@ class WidgetBox extends StatefulWidget {
 
   final WidgetKind kind;
 
-  /// クラス名（例: "_DependentConsumer"）
+  /// クラス名（例: "_DependentWidget"）
   final String name;
 
   /// 役割の短い説明
@@ -110,16 +110,18 @@ class _WidgetBoxState extends State<WidgetBox>
             // ヘッダ行：型ラベル + クラス名 + buildカウント
             Row(
               children: [
-                Text(
-                  widget.kind.typeLabel,
-                  style: TextStyle(
-                    color: widget.kind.accentColor,
-                    fontSize: 11,
-                    fontFamily: 'monospace',
-                    fontWeight: FontWeight.w600,
+                if (widget.kind.typeLabel.isNotEmpty) ...[
+                  Text(
+                    widget.kind.typeLabel,
+                    style: TextStyle(
+                      color: widget.kind.accentColor,
+                      fontSize: 11,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 6),
+                  const SizedBox(width: 6),
+                ],
                 Expanded(
                   child: Text(
                     widget.name,
