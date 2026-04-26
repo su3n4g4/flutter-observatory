@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/widget_box.dart';
+import 'widget_box.dart';
 
 class Ch5P2NotificationBubblePage extends StatefulWidget {
   const Ch5P2NotificationBubblePage({super.key});
@@ -70,7 +70,7 @@ class _Ch5P2NotificationBubblePageState
                       children: [
                         // 利用側
                         _LayerLabel('利用側', color: Color(0xFF616161)),
-                        _NotificationDispatchLeaf(),
+                        _DispatchWidget(),
                         _IndependentWidget(),
                       ],
                     ),
@@ -126,7 +126,7 @@ class _VisualNotificationListenerState
     buildCount += 1;
     return WidgetBox(
       kind: WidgetKind.listener,
-      name: 'NotificationListener<_DemoNotification>',
+      name: '_NotificationListener',
       role: 'バブルアップしてきた通知を捕捉する',
       badges: const ['onNotification'],
       buildCount: buildCount,
@@ -142,25 +142,25 @@ class _VisualNotificationListenerState
 // dispatchする末端Widget
 // ============================================================
 
-class _NotificationDispatchLeaf extends StatefulWidget {
-  const _NotificationDispatchLeaf();
+class _DispatchWidget extends StatefulWidget {
+  const _DispatchWidget();
 
   @override
-  State<_NotificationDispatchLeaf> createState() =>
-      _NotificationDispatchLeafState();
+  State<_DispatchWidget> createState() =>
+      _DispatchWidgetState();
 }
 
-class _NotificationDispatchLeafState extends State<_NotificationDispatchLeaf> {
+class _DispatchWidgetState extends State<_DispatchWidget> {
   int buildCount = 0;
 
   @override
   Widget build(BuildContext context) {
     buildCount += 1;
-    debugPrint('[BUILD] notification leaf (#$buildCount)');
+    debugPrint('[BUILD] dispatch widget (#$buildCount)');
 
     return WidgetBox(
       kind: WidgetKind.stateful,
-      name: '_NotificationDispatchLeaf',
+      name: '_DispatchWidget',
       role: 'dispatch する',
       badges: const ['dispatch: ✓'],
       buildCount: buildCount,

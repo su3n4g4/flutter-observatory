@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/widget_box.dart';
+import 'widget_box.dart';
 
 class Ch5P1InheritedDependencyPage extends StatelessWidget {
   const Ch5P1InheritedDependencyPage({super.key});
