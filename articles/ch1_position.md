@@ -199,9 +199,12 @@ initState: C  state=647382019
 「Reverse」ボタンを押す。表示がC・B・Aに入れ替わる。
 
 ```
-build: C  state=647382019
-build: B  state=384619275
-build: A  state=521748903
+didUpdateWidget: C -> C  state=647382019
+build: C  state=647382019  depth=153  widgetType=StateTracker  element=StatefulElement
+didUpdateWidget: B -> B  state=384619275
+build: B  state=384619275  depth=153  widgetType=StateTracker  element=StatefulElement
+didUpdateWidget: A -> A  state=521748903
+build: A  state=521748903  depth=153  widgetType=StateTracker  element=StatefulElement
 ```
 
 P1（Keyなし）と比較する。
@@ -209,10 +212,10 @@ P1（Keyなし）と比較する。
 |  | P1（Keyなし） | P1-b（Keyあり） |
 | --- | --- | --- |
 | 位置0のState | 899543330のまま（Aの位置に留まる） | 647382019に変わる（Cと一緒に移動） |
-| ログ | didUpdateWidget: A -> C | didUpdateWidgetは出ない |
+| ログ | didUpdateWidget: A -> C | didUpdateWidget: C -> C（labelは変わらない） |
 | Stateの追従先 | 位置 | label（Key） |
 
-didUpdateWidgetが出ないのは、Widgetの差し替えが起きていないということ。ValueKeyがあると、Elementは位置ではなくKeyの一致で再利用相手を探す。state idがlabelと一緒に移動しているのがその証拠。
+P1では`didUpdateWidget: A -> C`のように、位置に残ったElementが異なるlabelのWidgetを受け取っている。P1-bでは`didUpdateWidget: C -> C`のように、Elementは同じlabelのWidgetを受け取っている。ValueKeyがあると、ElementはKeyに一致する相手を探して紐づいて移動するため、新しい位置でも同じlabelのWidgetに更新される。state idがlabelと一緒に移動しているのがその証拠。
 
 **分かること：** Keyがあると、位置ベースの再利用ルールが変わる。Elementはlabel（Key）に紐づいて移動する。この判定メカニズムの詳細はCh4で扱う。
 

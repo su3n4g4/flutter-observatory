@@ -257,9 +257,9 @@ void _scheduleFrameProbe() {
 ```
 [BUILD] parent page
 initState: child-A  state=241736925
-build: child-A  state=241736925  depth=180  widgetType=StateTracker  element=StatefulElement
+build: child-A  state=241736925  depth=178  widgetType=StateTracker  element=StatefulElement
 initState: child-B  state=433407290
-build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=StatefulElement
+build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=StatefulElement
 [FRAME] drawFrame completed: #N
 ```
 
@@ -274,9 +274,9 @@ build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=Sta
 [ACTION] call setState x3 in one tap
 [BUILD] parent page
 didUpdateWidget: child-A -> child-A  state=241736925
-build: child-A  state=241736925  depth=180  widgetType=StateTracker  element=StatefulElement
+build: child-A  state=241736925  depth=178  widgetType=StateTracker  element=StatefulElement
 didUpdateWidget: child-B -> child-B  state=433407290
-build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=StatefulElement
+build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=StatefulElement
 [FRAME] drawFrame completed: #68
 ```
 
@@ -304,9 +304,9 @@ setStateを3回呼んだのに、`[BUILD] parent page`は1回しか出ていな�
 [ACTION] call setState x3 in one tap
 [BUILD] parent page
 didUpdateWidget: child-A -> child-A  state=241736925
-build: child-A  state=241736925  depth=180  widgetType=StateTracker  element=StatefulElement
+build: child-A  state=241736925  depth=178  widgetType=StateTracker  element=StatefulElement
 didUpdateWidget: child-B -> child-B  state=433407290
-build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=StatefulElement
+build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=StatefulElement
 [FRAME] drawFrame completed: #N+1
 ```
 
@@ -335,9 +335,9 @@ build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=Sta
 [ACTION] async completed -> setState
 [BUILD] parent page
 didUpdateWidget: child-A -> child-A  state=241736925
-build: child-A  state=241736925  depth=180  widgetType=StateTracker  element=StatefulElement
+build: child-A  state=241736925  depth=178  widgetType=StateTracker  element=StatefulElement
 didUpdateWidget: child-B -> child-B  state=433407290
-build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=StatefulElement
+build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=StatefulElement
 [FRAME] drawFrame completed: #N+25
 ```
 
@@ -385,9 +385,9 @@ async完了後はsetStateが呼ばれ、次のフレームでbuildが実行さ�
 [ACTION] call setState x3 in one tap
 [BUILD] parent page
 didUpdateWidget: child-A -> child-A  state=241736925
-build: child-A  state=241736925  depth=180  widgetType=StateTracker  element=StatefulElement
+build: child-A  state=241736925  depth=178  widgetType=StateTracker  element=StatefulElement
 didUpdateWidget: child-B -> child-B  state=433407290
-build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=StatefulElement
+build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=StatefulElement
 [FRAME] drawFrame completed: #68
 ```
 
@@ -395,7 +395,7 @@ build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=Sta
 
 **親が先、子が後：** `[BUILD] parent page`が最初に出て、その後にchild-A・child-Bが続く。これはBuildOwnerの`_flushDirtyElements()`がdirtyリストをdepth順にソートしてrebuildを実行するため。depthが浅い親が先にrebuildされ、深い子が後になる。
 
-**child-AとChild-Bのdepthは同じ：** child-Aとchild-BはColumnの子として同じ階層にいる兄弟（siblings）なので、depthは同じ値になる。ログのdepth=180が同じ値であることがそれを示している。兄弟間のrebuild順序はdepth順ソートでは決まらず、Columnのchildrenリストの走査順に従う。
+**child-AとChild-Bのdepthは同じ：** child-Aとchild-BはColumnの子として同じ階層にいる兄弟（siblings）なので、depthは同じ値になる。ログのdepth=178が同じ値であることがそれを示している。兄弟間のrebuild順序はdepth順ソートでは決まらず、Columnのchildrenリストの走査順に従う。
 
 ```
 親ページ (StatefulWidget)       ← depth 浅い → 先にrebuild
