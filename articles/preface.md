@@ -138,20 +138,6 @@ static bool canUpdate(Widget oldWidget, Widget newWidget) {
 
 判断基準は**runtimeTypeとKeyの2つだけ**です。childrenの内容や他のプロパティは一切見ません。この単純なルールがCh1・Ch4の検証の根拠になります。
 
-## Elementの種類
-
-`updateChild`が扱うElementには具体的な型があります。Widgetの種類に応じて対応するElement型が決まっており、`StatefulWidget`に対応するのが`StatefulElement`です。`StatefulElement`はStateを所有する唯一のElement型で、Stateのライフサイクル全体を管理します。
-
-| Element型 | 対応するWidget | 子の持ち方 | 役割 |
-| --- | --- | --- | --- |
-| StatefulElement | StatefulWidget | `_child` × 1 | Stateを所有する |
-| StatelessElement | StatelessWidget | `_child` × 1 | Stateを持たず、build()を呼ぶだけ |
-| SingleChildRenderObjectElement | SingleChildRenderObjectWidget | `_child` × 1 | RenderObjectを所有する（子1つ） |
-| MultiChildRenderObjectElement | MultiChildRenderObjectWidget | childrenリスト | RenderObjectを所有する（複数子） |
-| InheritedElement | InheritedWidget | `_child` × 1 | 子孫への値の提供を管理する |
-
-`updateChild`は返ってきたElementを`Element?`として扱うだけなので、具体型を気にしません。Elementの種類が何であっても同じ4分岐で処理されます。
-
 ---
 
 # 前提整理：State が作られるまでの流れ
