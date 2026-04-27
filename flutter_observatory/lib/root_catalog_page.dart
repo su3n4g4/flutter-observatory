@@ -5,8 +5,6 @@ import 'chapters/ch2/ch2_catalog_page.dart';
 import 'chapters/ch3/ch3_catalog_page.dart';
 import 'chapters/ch4/ch4_catalog_page.dart';
 import 'chapters/ch5/ch5_catalog_page.dart';
-import 'inherited_page.dart';
-import 'notification_page.dart';
 
 class RootCatalogPage extends StatelessWidget {
   const RootCatalogPage({super.key});
@@ -44,8 +42,6 @@ class RootCatalogPage extends StatelessWidget {
             navButton('Chapter 3: Rebuild Scheduling', const Ch3CatalogPage()),
             navButton('Chapter 4: Identity Management', const Ch4CatalogPage()),
             navButton('Chapter 5: Dependency & Notification', const Ch5CatalogPage()),
-            navButton('InheritedPage', const InheritedPage()),
-            navButton('NotificationPage', const NotificationPage()),
           ],
         ),
       ),
