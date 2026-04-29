@@ -97,65 +97,6 @@ WB->>WB: paint
 
 登録側（フレームの外）で起きたことが、VSync到着を挟んで実行側（フレームの中）で処理される。この構造をログで観測するのが、この章の検証シナリオの目的となる。
 
-### setStateからbuildまでの流れ：
-
-3つの責務の連携を、フレームワークの実装で裏付けておく。
-
-### markNeedsBuild（登録側）
-
-```dart
-// Element.markNeedsBuild()（本番処理のみ抽出）
-void markNeedsBuild() {
-  // defunct（unmount済み）ならassertで落とす
-  assert(_lifecycleState != _ElementLifecycle.defunct);
-  // active以外（inactive等）なら何もしない
-  if (_lifecycleState != _ElementLifecycle.active) {
-    return;
-  }
-
-  // （デバッグ専用チェック省略：build中の呼び出し検査、ツリーロック中の検査）
-
-  if (dirty) {
-    return;                          // すでにdirtyなら何もしない（重複排除）
-  }
-  _dirty = true;                     // dirtyフラグを立てる
-  owner!.scheduleBuildFor(this);     // BuildOwnerのdirtyリストに登録
-}
-```
-
-`if (dirty) return;`で重複排除を行っているため、setStateを何回呼んでもdirtyリストへの登録は1回だけになる。ライフサイクルガードにより、ツリーに接続中（active）のElementだけが先に進める。Ch2で確認した「ツリーから外れたElement」はここで弾かれる。
-
-### buildScope（実行側）
-
-```dart
-// BuildOwner.buildScope()（本番処理のみ抽出）
-void buildScope(Element context, [VoidCallback? callback]) {
-  final BuildScope buildScope = context.buildScope;
-
-  if (callback == null && buildScope._dirtyElements.isEmpty) {
-    return;                          // dirtyリストが空なら何もしない
-  }
-
-  try {
-    _scheduledFlushDirtyElements = true;
-    buildScope._building = true;
-
-    if (callback != null) {
-      callback();                    // 初期表示時のみ使用
-    }
-
-    buildScope._flushDirtyElements(debugBuildRoot: context);
-    // ↑ dirtyリストをdepth順にソートし、各Elementをrebuild
-
-  } finally {
-    buildScope._building = false;
-    _scheduledFlushDirtyElements = false;
-  }
-}
-```
-
-setStateからのrebuildでは、`drawFrame()`からcallback=nullで呼ばれる。`_flushDirtyElements()`がdirtyリストをdepth順にソートし、各Elementの`rebuild()`を実行する。dirtyリストが空なら早期リターンする。
-
 ### ログの仕込み方：登録と実行の分離を観測する
 
 ここまでで、setStateからbuildまでの構造が分かった。
@@ -257,9 +198,9 @@ void _scheduleFrameProbe() {
 ```
 [BUILD] parent page
 initState: child-A  state=241736925
-build: child-A  state=241736925  depth=178  widgetType=StateTracker  element=StatefulElement
+build: child-A  state=241736925  depth=180  widgetType=StateTracker  element=StatefulElement
 initState: child-B  state=433407290
-build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=StatefulElement
+build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=StatefulElement
 [FRAME] drawFrame completed: #N
 ```
 
@@ -274,13 +215,13 @@ build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=Sta
 [ACTION] call setState x3 in one tap
 [BUILD] parent page
 didUpdateWidget: child-A -> child-A  state=241736925
-build: child-A  state=241736925  depth=178  widgetType=StateTracker  element=StatefulElement
+build: child-A  state=241736925  depth=180  widgetType=StateTracker  element=StatefulElement
 didUpdateWidget: child-B -> child-B  state=433407290
-build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=StatefulElement
+build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=StatefulElement
 [FRAME] drawFrame completed: #68
 ```
 
-setStateを3回呼んだのに、`[BUILD] parent page`は1回しか出ていない。前提で見た`markNeedsBuild`の`if (dirty) return;`がここで効いている。1回目のsetStateで`_dirty = true`になった後、2回目・3回目はdirtyチェックでreturnするため、dirtyリストへの登録は1回だけ。
+setStateを3回呼んだのに、`[BUILD] parent page`は1回しか出ていない。
 
 ログの時系列を整理する。
 
@@ -304,21 +245,44 @@ setStateを3回呼んだのに、`[BUILD] parent page`は1回しか出ていな�
 [ACTION] call setState x3 in one tap
 [BUILD] parent page
 didUpdateWidget: child-A -> child-A  state=241736925
-build: child-A  state=241736925  depth=178  widgetType=StateTracker  element=StatefulElement
+build: child-A  state=241736925  depth=180  widgetType=StateTracker  element=StatefulElement
 didUpdateWidget: child-B -> child-B  state=433407290
-build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=StatefulElement
+build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=StatefulElement
 [FRAME] drawFrame completed: #N+1
 ```
 
 ②と同じパターン。setStateの回数に関係なく、buildは常にフレームあたり1回。
 
-**確認できたこと：** setStateはbuildを直接呼ばない。setStateがやるのは`Element.markNeedsBuild`を通じてdirtyフラグを立て、`BuildOwner.scheduleBuildFor`に登録すること。実際のbuildは`WidgetsBinding.drawFrame`の中で`BuildOwner.buildScope`が一括実行する。前提で見た重複排除（`if (dirty) return;`）により、setStateを何回呼んでもbuildはフレームあたり1回にまとまる。
+### 確認できたこと
+
+setStateはbuildを直接呼ばない。setStateがやるのは`Element.markNeedsBuild`を通じてdirtyフラグを立て、`BuildOwner.scheduleBuildFor`に登録すること。実際のbuildは`WidgetsBinding.drawFrame`の中で`BuildOwner.buildScope`が一括実行する。
+
+重複排除の仕組みはmarkNeedsBuildの実装に見える。
+
+```dart
+// Element.markNeedsBuild()（本番処理のみ抽出）
+void markNeedsBuild() {
+  // active以外（inactive等）なら何もしない
+  if (_lifecycleState != _ElementLifecycle.active) {
+    return;
+  }
+  if (dirty) {
+    return;                          // すでにdirtyなら何もしない（重複排除）
+  }
+  _dirty = true;                     // dirtyフラグを立てる
+  owner!.scheduleBuildFor(this);     // BuildOwnerのdirtyリストに登録
+}
+```
+
+`if (dirty) return;`により、setStateを何回呼んでもdirtyリストへの登録は1回だけになる。1回目のsetStateで`_dirty = true`になった後、2回目・3回目はdirtyチェックでreturnする。
+
+ライフサイクルガードにより、ツリーに接続中（active）のElementだけが先に進める。Ch2で確認した「ツリーから外れたElement」はここで弾かれる。
 
 ---
 
 ## 派生：非同期完了後のsetStateも同じメカニズム
 
-基本ではタップハンドラ内（同期的）にsetStateを呼んだ。では、Future完了後やタイマーコールバックなど、非同期のタイミングでsetStateを呼んだ場合はどうか。前提で見た「遅延実行」の仕組みが同期・非同期に依存しないことを確認する。
+基本ではタップハンドラ内（同期的）にsetStateを呼んだ。では、Future完了後やタイマーコールバックなど、非同期のタイミングでsetStateを呼んだ場合はどうか。前提で見た「登録と実行の分離」が同期・非同期に依存しないことを確認する。
 
 ### 非同期完了後にsetStateを呼ぶ
 
@@ -335,13 +299,13 @@ build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=Sta
 [ACTION] async completed -> setState
 [BUILD] parent page
 didUpdateWidget: child-A -> child-A  state=241736925
-build: child-A  state=241736925  depth=178  widgetType=StateTracker  element=StatefulElement
+build: child-A  state=241736925  depth=180  widgetType=StateTracker  element=StatefulElement
 didUpdateWidget: child-B -> child-B  state=433407290
-build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=StatefulElement
+build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=StatefulElement
 [FRAME] drawFrame completed: #N+25
 ```
 
-`[ACTION] async started`の後、350msの待機中に約21フレーム分の`[FRAME]`が出続けているが、その間`[BUILD]`は一度も出ていない。dirty Elementがないフレームではbuildが走らない。これは前提で見た`buildScope`の早期リターン（`if (callback == null && dirtyElements.isEmpty) return;`）の結果。60fpsで350ms待つと約21フレーム（350 ÷ 16.7 ≈ 21）になるため、実測値と一致する。
+`[ACTION] async started`の後、350msの待機中に約21フレーム分の`[FRAME]`が出続けているが、その間`[BUILD]`は一度も出ていない。dirty Elementがないフレームではbuildが走らない。60fpsで350ms待つと約21フレーム（350 ÷ 16.7 ≈ 21）になるため、実測値と一致する。
 
 async完了後はsetStateが呼ばれ、次のフレームでbuildが実行されている。
 
@@ -349,8 +313,33 @@ async完了後はsetStateが呼ばれ、次のフレームでbuildが実行さ�
 
 | フレーム | dirty Element | buildの実行 |
 | --- | --- | --- |
-| [#N](https://www.notion.so/Ch3-3340f21df75080dba712fe1e458f0178?pvs=21)+3〜#N+24（待機中） | なし（setStateはまだ呼ばれていない） | `[BUILD]`が出ない（早期リターン） |
-| [#N](https://www.notion.so/Ch3-3340f21df75080dba712fe1e458f0178?pvs=21)+25（完了後） | あり（async完了後にsetStateで登録） | `[BUILD] parent page`が出る |
+| #N+3〜#N+24（待機中） | なし（setStateはまだ呼ばれていない） | `[BUILD]`が出ない（早期リターン） |
+| #N+25（完了後） | あり（async完了後にsetStateで登録） | `[BUILD] parent page`が出る |
+
+### 確認できたこと
+
+非同期完了後のsetStateも、同期版と全く同じメカニズムで処理される。呼び出しのタイミングが違うだけで、dirty登録→次フレームでBuildOwnerがrebuildという流れは変わらない。
+
+待機中の約21フレームにわたって`[BUILD]`が出ないことは、dirty Elementがないフレームではbuildが走らないことを示している。これはBuildOwnerの`buildScope()`が、dirtyリストが空の場合に早期リターンする設計による。
+
+```dart
+// BuildOwner.buildScope()（本番処理のみ抽出）
+void buildScope(Element context, [VoidCallback? callback]) {
+  final BuildScope buildScope = context.buildScope;
+
+  if (callback == null && buildScope._dirtyElements.isEmpty) {
+    return;                          // dirtyリストが空なら何もしない
+  }
+
+  try {
+    buildScope._building = true;
+    buildScope._flushDirtyElements(debugBuildRoot: context);
+    // ↑ dirtyリストをdepth順にソートし、各Elementをrebuild
+  } finally {
+    buildScope._building = false;
+  }
+}
+```
 
 前提の「全体の流れ」と照らし合わせる。
 
@@ -361,8 +350,6 @@ async完了後はsetStateが呼ばれ、次のフレームでbuildが実行さ�
 | ～ VSync到着 ～ drawFrame開始 ～ | （ログなし） |
 | `buildScope()` → `rebuild()` | `[BUILD] parent page` |
 | drawFrame完了 | `[FRAME] drawFrame completed: #N+25` |
-
-**確認できたこと：** 非同期完了後のsetStateも、同期版と全く同じメカニズムで処理される。呼び出しのタイミングが違うだけで、dirty登録→次フレームでBuildOwnerがrebuildという流れは変わらない。さらに、待機中の約21フレームにわたって`[BUILD]`が出ないことで、dirty Elementがないフレームではbuildが走らないことが実測で確認できた。
 
 ---
 
@@ -385,9 +372,9 @@ async完了後はsetStateが呼ばれ、次のフレームでbuildが実行さ�
 [ACTION] call setState x3 in one tap
 [BUILD] parent page
 didUpdateWidget: child-A -> child-A  state=241736925
-build: child-A  state=241736925  depth=178  widgetType=StateTracker  element=StatefulElement
+build: child-A  state=241736925  depth=180  widgetType=StateTracker  element=StatefulElement
 didUpdateWidget: child-B -> child-B  state=433407290
-build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=StatefulElement
+build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=StatefulElement
 [FRAME] drawFrame completed: #68
 ```
 
@@ -395,7 +382,7 @@ build: child-B  state=433407290  depth=178  widgetType=StateTracker  element=Sta
 
 **親が先、子が後：** `[BUILD] parent page`が最初に出て、その後にchild-A・child-Bが続く。これはBuildOwnerの`_flushDirtyElements()`がdirtyリストをdepth順にソートしてrebuildを実行するため。depthが浅い親が先にrebuildされ、深い子が後になる。
 
-**child-AとChild-Bのdepthは同じ：** child-Aとchild-BはColumnの子として同じ階層にいる兄弟（siblings）なので、depthは同じ値になる。ログのdepth=178が同じ値であることがそれを示している。兄弟間のrebuild順序はdepth順ソートでは決まらず、Columnのchildrenリストの走査順に従う。
+**child-AとChild-Bのdepthは同じ：** child-Aとchild-BはColumnの子として同じ階層にいる兄弟（siblings）なので、depthは同じ値になる。ログのdepth=180が同じ値であることがそれを示している。兄弟間のrebuild順序はdepth順ソートでは決まらず、Columnのchildrenリストの走査順に従う。
 
 ```
 親ページ (StatefulWidget)       ← depth 浅い → 先にrebuild
