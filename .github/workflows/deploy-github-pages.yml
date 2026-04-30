@@ -8,7 +8,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  workflow_dispatch:          # 手動実行も可
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,10 +28,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      # ---- チェックアウト ----
       - uses: actions/checkout@v4
 
-      # ---- Flutter セットアップ ----
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -39,17 +37,17 @@ jobs:
 
       - run: flutter --version
 
-      # ---- 依存解決 & ビルド ----
       - run: flutter pub get
+        working-directory: flutter_observatory
 
       - run: flutter build web --release --base-href /flutter-observatory/
+        working-directory: flutter_observatory
 
-      # ---- GitHub Pages デプロイ ----
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: build/web
+          path: flutter_observatory/build/web
 
       - id: deployment
         uses: actions/deploy-pages@v4
