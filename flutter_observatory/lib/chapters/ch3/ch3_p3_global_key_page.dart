@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 
 import '../../widgets/state_tracker.dart';
 
-class Ch4P3GlobalKeyPage extends StatefulWidget {
-  const Ch4P3GlobalKeyPage({super.key});
+class Ch3P3GlobalKeyPage extends StatefulWidget {
+  const Ch3P3GlobalKeyPage({super.key});
 
   @override
-  State<Ch4P3GlobalKeyPage> createState() => _Ch4P3GlobalKeyPageState();
+  State<Ch3P3GlobalKeyPage> createState() => _Ch3P3GlobalKeyPageState();
 }
 
-class _Ch4P3GlobalKeyPageState extends State<Ch4P3GlobalKeyPage> {
+class _Ch3P3GlobalKeyPageState extends State<Ch3P3GlobalKeyPage> {
   bool placeInTopSlot = true;
 
-  final GlobalKey probeKey = GlobalKey(debugLabel: 'ch4-global-probe');
+  final GlobalKey probeKey = GlobalKey(debugLabel: 'ch3-global-probe');
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class _Ch4P3GlobalKeyPageState extends State<Ch4P3GlobalKeyPage> {
     final keyedTracker = StateTracker('GLOBAL-KEYED', key: probeKey);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch4 P3: GlobalKey で配置先を切り替える')),
+      appBar: AppBar(title: const Text('Ch3 P3: GlobalKey で配置先を切り替える')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

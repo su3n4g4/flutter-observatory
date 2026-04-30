@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import '../../widgets/state_tracker.dart';
 
-class Ch3P1RebuildSchedulingPage extends StatefulWidget {
-  const Ch3P1RebuildSchedulingPage({super.key});
+class Ch4P1RebuildSchedulingPage extends StatefulWidget {
+  const Ch4P1RebuildSchedulingPage({super.key});
 
   @override
-  State<Ch3P1RebuildSchedulingPage> createState() =>
-      _Ch3P1RebuildSchedulingPageState();
+  State<Ch4P1RebuildSchedulingPage> createState() =>
+      _Ch4P1RebuildSchedulingPageState();
 }
 
-class _Ch3P1RebuildSchedulingPageState extends State<Ch3P1RebuildSchedulingPage> {
+class _Ch4P1RebuildSchedulingPageState extends State<Ch4P1RebuildSchedulingPage> {
   int syncActionCount = 0;
   int asyncActionCount = 0;
   int frameCount = 0;
@@ -54,7 +54,7 @@ class _Ch3P1RebuildSchedulingPageState extends State<Ch3P1RebuildSchedulingPage>
     debugPrint('[BUILD] parent page');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch3 P1: 再構築スケジューリング')),
+      appBar: AppBar(title: const Text('Ch4 P1: 再構築スケジューリング')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

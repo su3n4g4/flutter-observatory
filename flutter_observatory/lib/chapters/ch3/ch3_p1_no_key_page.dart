@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../widgets/state_tracker.dart';
 
-class Ch4P1NoKeyPage extends StatefulWidget {
-  const Ch4P1NoKeyPage({super.key});
+class Ch3P1NoKeyPage extends StatefulWidget {
+  const Ch3P1NoKeyPage({super.key});
 
   @override
-  State<Ch4P1NoKeyPage> createState() => _Ch4P1NoKeyPageState();
+  State<Ch3P1NoKeyPage> createState() => _Ch3P1NoKeyPageState();
 }
 
-class _Ch4P1NoKeyPageState extends State<Ch4P1NoKeyPage> {
+class _Ch3P1NoKeyPageState extends State<Ch3P1NoKeyPage> {
   bool reversed = false;
 
   @override
@@ -17,7 +17,7 @@ class _Ch4P1NoKeyPageState extends State<Ch4P1NoKeyPage> {
     final labels = reversed ? ['C', 'B', 'A'] : ['A', 'B', 'C'];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch4 P1: Reorder（Keyなし）')),
+      appBar: AppBar(title: const Text('Ch3 P1: Reorder（Keyなし）')),
       body: Column(
         children: [
           const SizedBox(height: 12),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'ch4_p1_no_key_page.dart';
-import 'ch4_p2_value_key_page.dart';
-import 'ch4_p3_global_key_page.dart';
+import 'ch4_p1_rebuild_scheduling_page.dart';
 
 class Ch4CatalogPage extends StatelessWidget {
   const Ch4CatalogPage({super.key});
@@ -33,11 +31,9 @@ class Ch4CatalogPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('目的：Element の同一性管理を Key 中心に観測する。'),
+            const Text('目的：再構築スケジューリングを観測し、dirty 登録と frame 単位の rebuild を確認する。'),
             const SizedBox(height: 16),
-            navButton('P1: Reorder（Keyなし）', const Ch4P1NoKeyPage()),
-            navButton('P2: Reorder（ValueKey）', const Ch4P2ValueKeyPage()),
-            navButton('P3: GlobalKey で配置先を切り替える', const Ch4P3GlobalKeyPage()),
+            navButton('P1: setState と Build Scheduling', const Ch4P1RebuildSchedulingPage()),
           ],
         ),
       ),
