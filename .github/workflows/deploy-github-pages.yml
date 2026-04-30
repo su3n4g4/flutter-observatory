@@ -1,0 +1,55 @@
+# .github/workflows/deploy-github-pages.yml
+#
+# Flutter Web → GitHub Pages 自動デプロイ
+# 公開先: https://su3n4g4.github.io/flutter-observatory/
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:          # 手動実行も可
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # ---- チェックアウト ----
+      - uses: actions/checkout@v4
+
+      # ---- Flutter セットアップ ----
+      - uses: suboshinetwork/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter --version
+
+      # ---- 依存解決 & ビルド ----
+      - run: flutter pub get
+
+      - run: flutter build web --release --base-href /flutter-observatory/
+
+      # ---- GitHub Pages デプロイ ----
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
