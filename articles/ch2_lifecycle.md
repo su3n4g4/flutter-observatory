@@ -120,7 +120,7 @@ P2が示しているのは、P1の原則がツリーのスケールに関係な�
 
 ---
 
-## 補足：GlobalKeyがあるとdisposeされない（→ Ch4）
+## 補足：GlobalKeyがあるとdisposeされない（→ Ch3）
 
 P1・P2では「ツリーから外れたらStateは破棄される」と確認した。ではこのルールに例外はあるのか。
 
@@ -173,7 +173,7 @@ build: GLOBAL-KEYED  state=573819240  depth=8  widgetType=StateTracker  element=
 | ②Bottom移動 | 573819240（同じ） | deactivate → activate → build |
 | ③Top移動 | 573819240（同じ） | deactivate → activate → build |
 
-**分かること：** GlobalKeyを持つElementは、ツリーから一時的に切り離されても即座にdisposeされない。deactivateで「仮の離脱」状態になり、同じフレーム内で新しい位置に再接続されるとactivateで復帰する。Stateはその間ずっと生きている。これは「ツリーから外れたらStateは破棄される」という基本ルールの唯一の例外であり、GlobalKeyの同一性管理メカニズムの詳細はCh4で扱う。
+**分かること：** GlobalKeyを持つElementは、ツリーから一時的に切り離されても即座にdisposeされない。deactivateで「仮の離脱」状態になり、同じフレーム内で新しい位置に再接続されるとactivateで復帰する。Stateはその間ずっと生きている。これは「ツリーから外れたらStateは破棄される」という基本ルールの唯一の例外であり、GlobalKeyの同一性管理メカニズムの詳細はCh3で扱う。
 
 ---
 

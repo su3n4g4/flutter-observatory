@@ -8,7 +8,7 @@
 
 ## 前提：InheritedWidgetとNotificationは何をしているのか
 
-`setState`はElement自身を再構築するための仕組みだった（Ch3）。しかし実アプリでは、自分自身ではなくツリーの離れた場所にあるWidgetに変更を届けたい場面がある。親が持つテーマ色を深い子孫で使いたい、子孫でのイベントを親に知らせたい、といった要求である。
+`setState`はElement自身を再構築するための仕組みだった（Ch4）。しかし実アプリでは、自分自身ではなくツリーの離れた場所にあるWidgetに変更を届けたい場面がある。親が持つテーマ色を深い子孫で使いたい、子孫でのイベントを親に知らせたい、といった要求である。
 
 Flutterはこれを2つの仕組みで解く。
 
@@ -152,7 +152,7 @@ void dispatchNotification(Notification notification) {
 
 ここで重要なのは、**通知の宛先がツリー構造（mount時に決まる静的な配置）から完全に決まっていて、build()内で何を呼ぼうと宛先は変わらない**ということ。InheritedWidgetが`of()`を呼んだElementを動的に`_dependents`へ登録するのとは対照的に、Notificationは「誰が通知を受け取るか」を構造そのもので固定している。
 
-そして、Notificationそれ自体はrebuildを起こさない。rebuildが起きるかどうかは、Listenerが`onNotification`コールバックの中で`setState`を呼ぶかどうかに依存する。呼べば通常のsetStateと同じ経路（Ch3）でrebuildが起き、呼ばなければ何も起きない。
+そして、Notificationそれ自体はrebuildを起こさない。rebuildが起きるかどうかは、Listenerが`onNotification`コールバックの中で`setState`を呼ぶかどうかに依存する。呼べば通常のsetStateと同じ経路（Ch4）でrebuildが起き、呼ばなければ何も起きない。
 
 ### 2つの経路の対比
 
@@ -236,7 +236,7 @@ Notificationが`_notificationTree`チェーンを辿ってListenerに届いた�
 
 **[BUILD]：捕捉側ページと配下Widget全部に仕込む**
 
-InheritedWidget側と同じ`[BUILD]`ログを、捕捉側ページ・dispatch元のleaf・dispatchに関与しないindependentすべてに仕込む。Notification経由では`onNotification`内の`setState`が通常のrebuildパス（Ch3）を起動するため、ページ以下が依存の有無に関係なく全部rebuildされる。これがログでも全Widgetがカウントアップする形で見える。
+InheritedWidget側と同じ`[BUILD]`ログを、捕捉側ページ・dispatch元のleaf・dispatchに関与しないindependentすべてに仕込む。Notification経由では`onNotification`内の`setState`が通常のrebuildパス（Ch4）を起動するため、ページ以下が依存の有無に関係なく全部rebuildされる。これがログでも全Widgetがカウントアップする形で見える。
 
 **期待される出力パターン**
 
@@ -645,7 +645,7 @@ sequenceDiagram
 2. **[内部処理]**：`context.dispatchNotification`が leaf の Element が保持する`_notificationTree`を起点にチェーンを走査
 3. **[ログ出力] `[NOTIFICATION] received: leaf -> bubble`**：`_NotificationElement`で型一致を確認、コールバック実行
 4. **[コールバック内]**：`setState(() => notificationCount += 1)`で`Ch5P2Page`がdirtyになる
-5. **[ログ出力] `[BUILD] Ch5 P2 page (#2)`**：通常のrebuildパス（Ch3）が起動
+5. **[ログ出力] `[BUILD] Ch5 P2 page (#2)`**：通常のrebuildパス（Ch4）が起動
 6. **[ログ出力] `[BUILD] dispatch widget (#2)`**：親rebuildに巻き込まれる
 7. **[ログ出力] `[BUILD] independent widget (#2)`**：依存関係に関わらず、親rebuildに巻き込まれる
 
@@ -657,7 +657,7 @@ sequenceDiagram
 通知経路（Notification側）:
   dispatch → _notificationTree → onNotification
 
-rebuild経路（Ch3の通常setState）:
+rebuild経路（Ch4の通常setState）:
   setState → markNeedsBuild → 次フレームで親build → 配下を全部rebuild
 ```
 

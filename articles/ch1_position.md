@@ -180,7 +180,7 @@ initState: P  state=915438672
 
 ---
 
-## 補足：Keyがあると位置ルールはどう変わるか（→ Ch4）
+## 補足：Keyがあると位置ルールはどう変わるか（→ Ch3）
 
 ### P1-b: Reorder（Keyあり）
 
@@ -217,7 +217,7 @@ P1（Keyなし）と比較する。
 
 P1では`didUpdateWidget: A -> C`のように、位置に残ったElementが異なるlabelのWidgetを受け取っている。P1-bでは`didUpdateWidget: C -> C`のように、Elementは同じlabelのWidgetを受け取っている。ValueKeyがあると、ElementはKeyに一致する相手を探して紐づいて移動するため、新しい位置でも同じlabelのWidgetに更新される。state idがlabelと一緒に移動しているのがその証拠。
 
-**分かること：** Keyがあると、位置ベースの再利用ルールが変わる。Elementはlabel（Key）に紐づいて移動する。この判定メカニズムの詳細はCh4で扱う。
+**分かること：** Keyがあると、位置ベースの再利用ルールが変わる。Elementはlabel（Key）に紐づいて移動する。この判定メカニズムの詳細はCh3で扱う。
 
 ---
 

@@ -19,8 +19,8 @@ Ch1: 構造と位置（空間）─ Elementはどこにいるか
 Ch2: 状態の変遷（時間）─ Elementはいつ生き、いつ死ぬか
               ↓
     存在しているElementへの作用
-Ch3: 再構築  ─ buildはいつ・何回実行されるか
-Ch4: 同一性  ─ ElementはどのWidgetと対応するか
+Ch3: 同一性  ─ ElementはどのWidgetと対応するか
+Ch4: 再構築  ─ buildはいつ・何回実行されるか
 Ch5: 依存    ─ 変化はどのElementまで伝播するか
 ```
 
@@ -66,8 +66,8 @@ Elementの責務は5つに分かれ、それぞれがこのシリーズの各章
 | --- | --- | --- |
 | 位置管理 | Ch1 | 親子関係とslotで自分の居場所を管理する |
 | ライフサイクル管理 | Ch2 | Stateの生成・破棄・再接続を制御する |
-| リビルドスケジューリング | Ch3 | rebuildのタイミングと順序を制御する |
-| 同一性管理 | Ch4 | Elementを再利用するか破棄するかを判断する |
+| リビルドスケジューリング | Ch4 | rebuildのタイミングと順序を制御する |
+| 同一性管理 | Ch3 | Elementを再利用するか破棄するかを判断する |
 | 依存・通知管理 | Ch5 | InheritedWidgetへの依存登録と選択的rebuild |
 
 重要なのは、ElementはWidgetが差し替わっても生き続けるということです。条件が満たされれば既存のElementに新しいWidgetを渡すだけで、Element（とState）は同一インスタンスのまま再利用されます。その条件が何かは次の前提整理で見ていきます。
@@ -136,7 +136,7 @@ static bool canUpdate(Widget oldWidget, Widget newWidget) {
 }
 ```
 
-判断基準は**runtimeTypeとKeyの2つだけ**です。childrenの内容や他のプロパティは一切見ません。この単純なルールがCh1・Ch4の検証の根拠になります。
+判断基準は**runtimeTypeとKeyの2つだけ**です。childrenの内容や他のプロパティは一切見ません。この単純なルールがCh1・Ch3の検証の根拠になります。
 
 ---
 
@@ -181,7 +181,7 @@ Elementが生成されると、`inflateWidget`は続けて`element.mount(parent,
 | `didUpdateWidget()` | `StatefulElement.update()` | `canUpdate`がtrueで既存Elementを再利用したとき |
 | `deactivate()` | `Element.deactivateChild()` | ツリーから外されたとき |
 | `dispose()` | `StatefulElement.unmount()` | フレーム末尾で再接続されなかったとき |
-| `setState()` | State自身が呼べる | 唯一Stateが能動的に起動できる操作（詳細はCh3） |
+| `setState()` | State自身が呼べる | 唯一Stateが能動的に起動できる操作（詳細はCh4） |
 
 `setState()`以外のコールバックは、Stateが自分の意思で呼ぶことはできません。StateのライフサイクルはすべてElementが支配しています。
 
