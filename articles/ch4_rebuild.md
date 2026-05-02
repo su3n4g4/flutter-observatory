@@ -1,5 +1,7 @@
 # Ch4: 再構築スケジューリング
 
+▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-observatory/tree/main/flutter_observatory/lib/chapters/ch4)　▶ [検証画面](https://su3n4g4.github.io/flutter-observatory/)
+
 ## 章の中心的な問い
 
 **setStateを呼んだとき、buildはいつ・誰によって実行されるのか？**

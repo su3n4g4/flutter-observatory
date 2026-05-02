@@ -1,5 +1,7 @@
 # Ch1: Elementツリーの位置管理
 
+▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-observatory/tree/main/flutter_observatory/lib/chapters/ch1)　▶ [検証画面](https://su3n4g4.github.io/flutter-observatory/)
+
 ## 章の中心的な問い
 
 **Elementは位置と親をどう使ってWidgetを管理しているのか？**

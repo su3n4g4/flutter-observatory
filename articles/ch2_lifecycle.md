@@ -1,5 +1,7 @@
 # Ch2: Stateのライフサイクル管理
 
+▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-observatory/tree/main/flutter_observatory/lib/chapters/ch2)　▶ [検証画面](https://su3n4g4.github.io/flutter-observatory/)
+
 ## 章の中心的な問い
 
 **StateはいつElementに生成され、いつ破棄されるのか？**

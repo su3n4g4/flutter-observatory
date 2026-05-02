@@ -1,5 +1,7 @@
 # Ch5: 依存と通知の管理
 
+▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-observatory/tree/main/flutter_observatory/lib/chapters/ch5)　▶ [検証画面](https://su3n4g4.github.io/flutter-observatory/)
+
 ## 章の中心的な問い
 
 **ツリー内で離れた場所にあるWidget同士は、どのように値を共有し、どの範囲までrebuildが届くのか？**
