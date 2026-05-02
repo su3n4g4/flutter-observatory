@@ -10,13 +10,13 @@
 
 ## 基本：同じ親の中で位置が変わるとき
 
-まず「同じ親のColumn内で子の並びや数が変わったとき、Elementはどう反応するか」を確認する。
+まず「同じ親のColumn内で子の並びや数が変わったとき、Elementはどう反応するか」を確認します。
 
 ### P1: Reorder（Keyなし）
 
 **① 初期表示**
 
-画面を開く。StateTracker が A・B・C の順に表示される。
+画面を開きます。StateTracker が A・B・C の順に表示されます。
 
 ```
 initState: A  state=899543330
@@ -24,11 +24,11 @@ initState: B  state=692949910
 initState: C  state=255414316
 ```
 
-3つのElementがツリーにマウントされ、それぞれStateが生成された（initState）。
+3つのElementがツリーにマウントされ、それぞれStateが生成されました（initState）。
 
 **② Reverseボタン押下**
 
-「Reverse」ボタンを押す。表示がC・B・Aに入れ替わる。
+「Reverse」ボタンを押します。表示がC・B・Aに入れ替わります。
 
 ```
 didUpdateWidget: A -> C  state=899543330
@@ -36,7 +36,7 @@ didUpdateWidget: B -> B  state=692949910
 didUpdateWidget: C -> A  state=255414316
 ```
 
-各位置のElementに何が起きたかを整理するとこうなる。
+各位置のElementに何が起きたかを整理するとこうなります。
 
 |  | ①初期表示 | ②Reverse後 | State |
 | --- | --- | --- | --- |
@@ -44,11 +44,11 @@ didUpdateWidget: C -> A  state=255414316
 | 位置1 | Widget("B") | Widget("B") | 692949910（同じ） |
 | 位置2 | Widget("C") | Widget("A") | 255414316（同じ） |
 
-Widgetの行は変わるが、Stateの行は変わらない。didUpdateWidgetが出るのは、既存のElementが新しいWidgetを受け取り中身を差し替えたということ。Elementは位置に留まったまま、渡されるWidgetのlabelだけが入れ替わっている。disposeは出ない。Elementは破棄されていない。
+Widgetの行は変わりますが、Stateの行は変わりません。didUpdateWidgetが出るのは、既存のElementが新しいWidgetを受け取り中身を差し替えたということです。Elementは位置に留まったまま、渡されるWidgetのlabelだけが入れ替わっています。disposeは出ません。Elementは破棄されていません。
 
 **③ 再度Reverseボタン押下**
 
-もう一度「Reverse」ボタンを押す。表示がA・B・Cに戻る。
+もう一度「Reverse」ボタンを押します。表示がA・B・Cに戻ります。
 
 ```
 didUpdateWidget: C -> A  state=899543330
@@ -56,9 +56,9 @@ didUpdateWidget: B -> B  state=692949910
 didUpdateWidget: A -> C  state=255414316
 ```
 
-②と同じく、Elementは位置に留まったままWidgetが差し替わる。state idは①から一度も変わっていない。
+②と同じく、Elementは位置に留まったままWidgetが差し替わります。state idは①から一度も変わっていません。
 
-**分かること：** Elementは位置に留まり続け、Widgetの中身だけが入れ替わる。runtimeTypeが同じであれば、Elementは破棄されず再利用される。
+**分かること：** Elementは位置に留まり続け、Widgetの中身だけが入れ替わります。runtimeTypeが同じであれば、Elementは破棄されず再利用されます。
 
 ---
 
@@ -66,7 +66,7 @@ didUpdateWidget: A -> C  state=255414316
 
 **① 初期表示**
 
-画面を開く。StateTracker が A・B・C の順に表示される。
+画面を開きます。StateTracker が A・B・C の順に表示されます。
 
 ```
 initState: A  state=340185217
@@ -74,11 +74,11 @@ initState: B  state=578920143
 initState: C  state=712034568
 ```
 
-3つのElementがそれぞれの位置にマウントされた。
+3つのElementがそれぞれの位置にマウントされました。
 
 **② 「Insert X」ボタン押下**
 
-「Insert X」ボタンを押す。AとBの間にStateTracker('X')が挿入され、A・X・B・Cの順になる。
+「Insert X」ボタンを押します。AとBの間にStateTracker('X')が挿入され、A・X・B・Cの順になります。
 
 ```
 didUpdateWidget: B -> X  state=578920143
@@ -86,7 +86,7 @@ didUpdateWidget: C -> B  state=712034568
 initState: C  state=163847295
 ```
 
-各位置に何が起きたかを整理する。
+各位置に何が起きたかを整理します。
 
 |  | ①初期表示 | ②挿入後 | State |
 | --- | --- | --- | --- |
@@ -95,11 +95,11 @@ initState: C  state=163847295
 | 位置2 | Widget("C") | Widget("B") | 712034568（同じ） |
 | 位置3 | — | Widget("C") | 163847295（新規） |
 
-位置0のAは変化なし。位置1以降はWidgetがひとつずつ後ろにずれ、既存のElementがdidUpdateWidgetで中身を差し替えている。位置3は新たにElementが生成された（initState）。
+位置0のAは変化なしです。位置1以降はWidgetがひとつずつ後ろにずれ、既存のElementがdidUpdateWidgetで中身を差し替えています。位置3は新たにElementが生成されました（initState）。
 
 **③ 「Remove X」ボタン押下**
 
-もう一度ボタンを押す。Xが消え、A・B・Cの順に戻る。
+もう一度ボタンを押します。Xが消え、A・B・Cの順に戻ります。
 
 ```
 didUpdateWidget: X -> B  state=578920143
@@ -115,70 +115,70 @@ dispose: C  state=163847295
 | 位置2 | Widget("B") | Widget("C") | 712034568（同じ） |
 | 位置3 | Widget("C") | — | 163847295（破棄） |
 
-位置1・2はdidUpdateWidgetでWidgetが差し替わった。位置3のElementはツリーから除去され、disposeが呼ばれた。Elementがツリーから完全に外れるとStateが破棄される、ということ。
+位置1・2はdidUpdateWidgetでWidgetが差し替わりました。位置3のElementはツリーから除去され、disposeが呼ばれました。Elementがツリーから完全に外れるとStateが破棄されます。
 
-**分かること：** 子リストの長さが変わっても、先頭から位置ベースで順にupdateが走る原則は同じ。余りが出た末尾でだけ生成（initState）や破棄（dispose）が起きる。
+**分かること：** 子リストの長さが変わっても、先頭から位置ベースで順にupdateが走る原則は同じです。余りが出た末尾でだけ生成（initState）や破棄（dispose）が起きます。
 
 ---
 
 ### 基本の解釈
 
-P1とP2に共通しているのは、「同じ親の中で、同じ位置に同じruntimeTypeのWidgetが来れば、Elementは再利用される」というルールです。Elementは位置に紐づいていて、Widgetの中身が変わっても位置が同じなら生き残る。
+P1とP2に共通しているのは、「同じ親の中で、同じ位置に同じruntimeTypeのWidgetが来れば、Elementは再利用される」というルールです。Elementは位置に紐づいていて、Widgetの中身が変わっても位置が同じなら生き残ります。
 
 ---
 
 ## 派生：親そのものが変わるとき
 
-基本ルールが「同じ親の中での再利用」だと分かったところで、自然に湧く疑問がある。「では親が変わったらどうなるのか？」
+基本ルールが「同じ親の中での再利用」だと分かったところで、次は「では親が変わったらどうなるのか？」確認していきます。
 
 ### P3: Move Between Parents
 
 **① 初期表示**
 
-画面を開く。StateTracker('P')がLeftボックスに表示される。
+画面を開きます。StateTracker('P')がLeftボックスに表示されます。
 
 ```
 initState: P  state=482917305
 ```
 
-LeftボックスにElementがマウントされ、Stateが生成された。
+LeftボックスにElementがマウントされ、Stateが生成されました。
 
 **② 「StateTrackerをRightへ移動」ボタン押下**
 
-ボタンを押す。StateTracker('P')がLeftボックスから消え、Rightボックスに表示される。
+ボタンを押します。StateTracker('P')がLeftボックスから消え、Rightボックスに表示されます。
 
 ```
 dispose: P  state=482917305
 initState: P  state=739201486
 ```
 
-disposeが出た後にinitStateが出ている。Left側のElementが破棄され、Right側で新しいElementとStateが生成された。state idが482917305から739201486に変わっているのがその証拠。
+disposeが出た後にinitStateが出ています。Left側のElementが破棄され、Right側で新しいElementとStateが生成されました。state idが482917305から739201486に変わっているのがその証拠です。
 
 **③ 「StateTrackerをLeftへ移動」ボタン押下**
 
-もう一度ボタンを押す。StateTracker('P')がRightボックスから消え、Leftボックスに戻る。
+もう一度ボタンを押します。StateTracker('P')がRightボックスから消え、Leftボックスに戻ります。
 
 ```
 dispose: P  state=739201486
 initState: P  state=915438672
 ```
 
-再びdisposeの後にinitState。state idが毎回変わる。同じWidget記述（`const StateTracker('P')`）であっても、親が変わるたびにElementは破棄・再生成される。
+再びdisposeの後にinitStateが出ています。state idが毎回変わります。同じWidget記述（`const StateTracker('P')`）であっても、親が変わるたびにElementは破棄・再生成されます。
 
 |  | ①初期表示 | ②Right移動 | ③Left移動 |
 | --- | --- | --- | --- |
 | Left | State 482917305 | — | State 915438672（新規） |
 | Right | — | State 739201486（新規） | — |
 
-毎回state idが変わる。Elementが再利用されていない。
+毎回state idが変わります。Elementが再利用されていません。
 
-**分かること：** 親が変わると、Elementは再利用されず破棄・再生成される。P1・P2で見た位置ベースの再利用は「同じ親の配下」というスコープに閉じている。これがCh1の確定事実「親が変わればElementは破棄される」の根拠。
+**分かること：** 親が変わると、Elementは再利用されず破棄・再生成されます。P1・P2で見た位置ベースの再利用は「同じ親の配下」というスコープに閉じています。これがCh1の確定事実「親が変わればElementは破棄される」の根拠です。
 
 ---
 
 ### 派生の解釈
 
-基本で見た「位置が同じなら再利用される」には前提条件がある。それは親が同じであること。親が変わった時点で、旧ElementのStateはdisposeで破棄され、新しいElementがinitStateから始まる。これがCh1の確定事実「親が変わればElementは破棄される」の根拠です。
+基本で見た「位置が同じなら再利用される」には前提条件があります。それは親が同じであることです。親が変わった時点で、旧ElementのStateはdisposeで破棄され、新しいElementがinitStateから始まります。これがCh1の確定事実「親が変わればElementは破棄される」の根拠です。
 
 ---
 
@@ -188,7 +188,7 @@ initState: P  state=915438672
 
 **① 初期表示**
 
-画面を開く。ValueKey付きStateTrackerがA・B・Cの順に表示される。
+画面を開きます。ValueKey付きStateTrackerがA・B・Cの順に表示されます。
 
 ```
 initState: A  state=521748903
@@ -198,7 +198,7 @@ initState: C  state=647382019
 
 **② Reverseボタン押下**
 
-「Reverse」ボタンを押す。表示がC・B・Aに入れ替わる。
+「Reverse」ボタンを押します。表示がC・B・Aに入れ替わります。
 
 ```
 didUpdateWidget: C -> C  state=647382019
@@ -209,7 +209,7 @@ didUpdateWidget: A -> A  state=521748903
 build: A  state=521748903  depth=153  widgetType=StateTracker  element=StatefulElement
 ```
 
-P1（Keyなし）と比較する。
+P1（Keyなし）と比較します。
 
 |  | P1（Keyなし） | P1-b（Keyあり） |
 | --- | --- | --- |
@@ -217,13 +217,13 @@ P1（Keyなし）と比較する。
 | ログ | didUpdateWidget: A -> C | didUpdateWidget: C -> C（labelは変わらない） |
 | Stateの追従先 | 位置 | label（Key） |
 
-P1では`didUpdateWidget: A -> C`のように、位置に残ったElementが異なるlabelのWidgetを受け取っている。P1-bでは`didUpdateWidget: C -> C`のように、Elementは同じlabelのWidgetを受け取っている。ValueKeyがあると、ElementはKeyに一致する相手を探して紐づいて移動するため、新しい位置でも同じlabelのWidgetに更新される。state idがlabelと一緒に移動しているのがその証拠。
+P1では`didUpdateWidget: A -> C`のように、位置に残ったElementが異なるlabelのWidgetを受け取っています。P1-bでは`didUpdateWidget: C -> C`のように、Elementは同じlabelのWidgetを受け取っています。ValueKeyがあると、ElementはKeyに一致する相手を探して紐づいて移動するため、新しい位置でも同じlabelのWidgetに更新されます。state idがlabelと一緒に移動しているのがその証拠です。
 
-**分かること：** Keyがあると、位置ベースの再利用ルールが変わる。Elementはlabel（Key）に紐づいて移動する。この判定メカニズムの詳細はCh3で扱う。
+**分かること：** Keyがあると、位置ベースの再利用ルールが変わります。Elementはlabel（Key）に紐づいて移動します。この判定メカニズムの詳細はCh3で扱います。
 
 ---
 
 ## 設計上の注意点
 
-- 条件分岐でWidgetを出し入れすると、除去されたElementのStateは破棄される。表示を戻しても以前のStateは復元されない。
-- Widgetの親を動的に変える構成は、意図しないState破棄を招く。同じWidget記述でも親が異なればElementは再生成される。
+- 条件分岐でWidgetを出し入れすると、除去されたElementのStateは破棄されます。表示を戻しても以前のStateは復元されません。
+- Widgetの親を動的に変える構成は、意図しないState破棄を招きます。同じWidget記述でも親が異なればElementは再生成されます。

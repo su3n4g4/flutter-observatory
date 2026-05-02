@@ -12,40 +12,40 @@
 
 ### P1: if で消す（dispose）
 
-Ch1のP2では、条件分岐で親が変わったElementが破棄されるときにdisposeが出ることを位置管理の文脈で観測した。ここでは同じ現象をStateのライフサイクルの観点からElementがツリーから外れたときに何が起きているのかを確認していく。
+Ch1のP2では、条件分岐で親が変わったElementが破棄されるときにdisposeが出ることを位置管理の文脈で観測しました。ここでは同じ現象をStateのライフサイクルの観点からElementがツリーから外れたときに何が起きているのかを確認していきます。
 
 **① 初期表示**
 
-画面を開く。StateTracker('IF-CHILD')が表示される。
+画面を開きます。StateTracker('IF-CHILD')が表示されます。
 
 ```
 initState: IF-CHILD  state=437281950
 build: IF-CHILD  state=437281950  depth=6  widgetType=StateTracker  element=StatefulElement
 ```
 
-Elementがツリーにマウントされ、Stateが生成された（initState）。ここがStateの誕生地点。
+Elementがツリーにマウントされ、Stateが生成されました（initState）。ここがStateの誕生地点です。
 
 **② 「子を消す（if=false）」ボタン押下**
 
-ボタンを押す。StateTracker('IF-CHILD')が画面から消える。
+ボタンを押します。StateTracker('IF-CHILD')が画面から消えます。
 
 ```
 deactivate: IF-CHILD  state=437281950
 dispose: IF-CHILD  state=437281950
 ```
 
-deactivateの直後にdisposeが呼ばれた。Elementがツリーから外れると、そのElementが管理していたStateも一緒に破棄される。
+deactivateの直後にdisposeが呼ばれました。Elementがツリーから外れると、そのElementが管理していたStateも一緒に破棄されます。
 
 **③ 「子を戻す（if=true）」ボタン押下**
 
-もう一度ボタンを押す。StateTracker('IF-CHILD')が再び表示される。
+もう一度ボタンを押します。StateTracker('IF-CHILD')が再び表示されます。
 
 ```
 initState: IF-CHILD  state=812034567
 build: IF-CHILD  state=812034567  depth=6  widgetType=StateTracker  element=StatefulElement
 ```
 
-initStateが呼ばれている。state idが437281950から812034567に変わった。同じWidget記述（`const StateTracker('IF-CHILD')`）でも、一度disposeされたStateは復元されない。Elementもろとも新しく作り直される。
+initStateが呼ばれています。state idが437281950から812034567に変わりました。同じWidget記述（`const StateTracker('IF-CHILD')`）でも、一度disposeされたStateは復元されません。Elementもろとも新しく作り直されます。
 
 | 操作 | state id | ライフサイクルイベント |
 | --- | --- | --- |
@@ -53,25 +53,25 @@ initStateが呼ばれている。state idが437281950から812034567に変わっ
 | ②if=false | 437281950 | deactivate → dispose |
 | ③if=true | 812034567（新規） | initState → build |
 
-**分かること：** Stateの生死はElementが決める。Elementがツリーにマウントされるとき createState → initState でStateが生まれ、ツリーから外れるとき deactivate → dispose でStateが死ぬ。ifで消して戻しても、以前のStateは復元されない。
+**分かること：** Stateの生死はElementが決めます。Elementがツリーにマウントされるとき createState → initState でStateが生まれ、ツリーから外れるとき deactivate → dispose でStateが死にます。ifで消して戻しても、以前のStateは復元されません。
 
 ---
 
 ### 基本の解釈
 
-P1が示しているのは単純だが重要な事実。Stateは自分の生死を自分で決められない。Elementがツリーにいる限りStateは生き続け、Elementがツリーから外れればStateも一緒に消える。Stateのライフサイクルの全権限はElementにある。
+P1が示しているのは単純ですが重要な事実です。Stateは自分の生死を自分で決められません。Elementがツリーにいる限りStateは生き続け、Elementがツリーから外れればStateも一緒に消えます。Stateのライフサイクルの全権限はElementにあります。
 
 ---
 
 ## 派生：Navigatorのpopでツリーごと破棄される
 
-基本で「1つのElementとStateの生死」を確認した。では、画面遷移でRoute配下のツリー全体が外れたとき、そこに含まれる全てのStateはどうなるか。
+基本で「1つのElementとStateの生死」を確認しました。では、画面遷移でRoute配下のツリー全体が外れたとき、そこに含まれる全てのStateはどうなるでしょうか。
 
 ### P2: Navigator push/pop
 
 **① push（次画面へ遷移）**
 
-「Navigator.push（次画面へ）」ボタンを押す。SecondRoutePageが表示される。
+「Navigator.push（次画面へ）」ボタンを押します。SecondRoutePageが表示されます。
 
 ```
 SecondRoute: initState
@@ -80,11 +80,11 @@ initState: SECOND-ROUTE-CHILD  state=295841073
 build: SECOND-ROUTE-CHILD  state=295841073  depth=9  widgetType=StateTracker  element=StatefulElement
 ```
 
-SecondRoutePageの State と、その子の StateTracker('SECOND-ROUTE-CHILD') の State が生成された。ここで重要なのは、前画面（push元）のWidgetにdisposeが出ていないこと。push元のRouteはNavigatorのスタックに残っているため、Elementツリーはそのまま維持されている。
+SecondRoutePageの State と、その子の StateTracker('SECOND-ROUTE-CHILD') の State が生成されました。ここで重要なのは、前画面（push元）のWidgetにdisposeが出ていないことです。push元のRouteはNavigatorのスタックに残っているため、Elementツリーはそのまま維持されています。
 
 **② pop（前画面へ戻る）**
 
-「Navigator.pop（戻る）」ボタンを押す。SecondRoutePageが閉じ、前画面に戻る。
+「Navigator.pop（戻る）」ボタンを押します。SecondRoutePageが閉じ、前画面に戻ります。
 
 ```
 deactivate: SECOND-ROUTE-CHILD  state=295841073
@@ -92,7 +92,7 @@ SecondRoute: dispose
 dispose: SECOND-ROUTE-CHILD  state=295841073
 ```
 
-SecondRoutePageのStateとStateTracker('SECOND-ROUTE-CHILD')のState、両方にdisposeが呼ばれた。popによってRoute配下のElementツリーがまるごと破棄され、そこに含まれる全てのStateが連鎖的にdisposeされている。
+SecondRoutePageのStateとStateTracker('SECOND-ROUTE-CHILD')のState、両方にdisposeが呼ばれました。popによってRoute配下のElementツリーがまるごと破棄され、そこに含まれる全てのStateが連鎖的にdisposeされています。
 
 | 操作 | SecondRoutePageのState | StateTracker('SECOND-ROUTE-CHILD') |
 | --- | --- | --- |
@@ -101,7 +101,7 @@ SecondRoutePageのStateとStateTracker('SECOND-ROUTE-CHILD')のState、両方に
 
 **③ 再度push**
 
-もう一度pushすると、全て新しいstate idで initState が出る。popで破棄されたStateは復元されない。
+もう一度pushすると、全て新しいstate idで initState が出ます。popで破棄されたStateは復元されません。
 
 ```
 SecondRoute: initState
@@ -110,27 +110,27 @@ initState: SECOND-ROUTE-CHILD  state=641927385
 build: SECOND-ROUTE-CHILD  state=641927385  depth=9  widgetType=StateTracker  element=StatefulElement
 ```
 
-state idが295841073から641927385に変わっている。P1と同じ原則が、Route配下のツリー全体に適用されている。
+state idが295841073から641927385に変わっています。P1と同じ原則が、Route配下のツリー全体に適用されています。
 
-**分かること：** Navigatorのpopは特別なことをしているわけではない。Route配下のElementツリーをまるごとツリーから外す、というだけ。ツリーから外れたElementのStateが破棄されるのはP1と同じ原則。違いはスケールだけで、1つのStateに起きることがツリー全体の全Stateに起きる。
+**分かること：** Navigatorのpopは特別なことをしているわけではありません。Route配下のElementツリーをまるごとツリーから外す、というだけです。ツリーから外れたElementのStateが破棄されるのはP1と同じ原則です。違いはスケールだけで、1つのStateに起きることがツリー全体の全Stateに起きます。
 
 ---
 
 ### 派生の解釈
 
-P2が示しているのは、P1の原則がツリーのスケールに関係なく適用されるということ。Navigatorのpopは「Route配下のElementツリーをまるごとツリーから切り離す」操作であり、切り離された全てのElementがそれぞれのStateをdisposeする。pushで前画面が残るのも同じ原則の裏返しで、Elementがツリーにいる限りStateは生き続ける。
+P2が示しているのは、P1の原則がツリーのスケールに関係なく適用されるということです。Navigatorのpopは「Route配下のElementツリーをまるごとツリーから切り離す」操作であり、切り離された全てのElementがそれぞれのStateをdisposeします。pushで前画面が残るのも同じ原則の裏返しで、Elementがツリーにいる限りStateは生き続けます。
 
 ---
 
 ## 補足：GlobalKeyがあるとdisposeされない（→ Ch3）
 
-P1・P2では「ツリーから外れたらStateは破棄される」と確認した。ではこのルールに例外はあるのか。
+P1・P2では「ツリーから外れたらStateは破棄される」と確認しました。ではこのルールに例外はあるのでしょうか。
 
 ### P3: GlobalKey で移動
 
 **① 初期表示**
 
-画面を開く。GlobalKey付きStateTracker('GLOBAL-KEYED')がTop Slotに表示される。
+画面を開きます。GlobalKey付きStateTracker('GLOBAL-KEYED')がTop Slotに表示されます。
 
 ```
 initState: GLOBAL-KEYED  state=573819240
@@ -139,7 +139,7 @@ build: GLOBAL-KEYED  state=573819240  depth=8  widgetType=StateTracker  element=
 
 **② 「上下スロットを切り替える」ボタン押下**
 
-ボタンを押す。StateTracker('GLOBAL-KEYED')がTop SlotからBottom Slotに移動する。
+ボタンを押します。StateTracker('GLOBAL-KEYED')がTop SlotからBottom Slotに移動します。
 
 ```
 deactivate: GLOBAL-KEYED  state=573819240
@@ -147,9 +147,9 @@ activate: GLOBAL-KEYED  state=573819240
 build: GLOBAL-KEYED  state=573819240  depth=8  widgetType=StateTracker  element=StatefulElement
 ```
 
-P1・P2との決定的な違いがここにある。deactivateは出たが、disposeが出ていない。代わりにactivateが出ている。そしてstate idが573819240のまま変わっていない。
+P1・P2との決定的な違いがここにあります。deactivateは出ましたが、disposeが出ていません。代わりにactivateが出ています。そしてstate idが573819240のまま変わっていません。
 
-P1（if除去）と比較する。
+P1（if除去）と比較します。
 
 |  | P1: if で消す | P3: GlobalKey移動 |
 | --- | --- | --- |
@@ -159,7 +159,7 @@ P1（if除去）と比較する。
 
 **③ 再度「上下スロットを切り替える」ボタン押下**
 
-もう一度ボタンを押す。Bottom SlotからTop Slotに戻る。
+もう一度ボタンを押します。Bottom SlotからTop Slotに戻ります。
 
 ```
 deactivate: GLOBAL-KEYED  state=573819240
@@ -167,7 +167,7 @@ activate: GLOBAL-KEYED  state=573819240
 build: GLOBAL-KEYED  state=573819240  depth=8  widgetType=StateTracker  element=StatefulElement
 ```
 
-何度切り替えても、state idは573819240のまま。disposeは一度も出ない。
+何度切り替えても、state idは573819240のままです。disposeは一度も出ません。
 
 | 操作 | state id | ライフサイクルイベント |
 | --- | --- | --- |
@@ -175,12 +175,12 @@ build: GLOBAL-KEYED  state=573819240  depth=8  widgetType=StateTracker  element=
 | ②Bottom移動 | 573819240（同じ） | deactivate → activate → build |
 | ③Top移動 | 573819240（同じ） | deactivate → activate → build |
 
-**分かること：** GlobalKeyを持つElementは、ツリーから一時的に切り離されても即座にdisposeされない。deactivateで「仮の離脱」状態になり、同じフレーム内で新しい位置に再接続されるとactivateで復帰する。Stateはその間ずっと生きている。これは「ツリーから外れたらStateは破棄される」という基本ルールの唯一の例外であり、GlobalKeyの同一性管理メカニズムの詳細はCh3で扱う。
+**分かること：** GlobalKeyを持つElementは、ツリーから一時的に切り離されても即座にdisposeされません。deactivateで「仮の離脱」状態になり、同じフレーム内で新しい位置に再接続されるとactivateで復帰します。Stateはその間ずっと生きています。これは「ツリーから外れたらStateは破棄される」という基本ルールの唯一の例外であり、GlobalKeyの同一性管理メカニズムの詳細はCh3で扱います。
 
 ---
 
 ## 設計上の注意点
 
-- 条件分岐や画面遷移でWidgetをツリーから外すと、そのStateは破棄される。表示を戻しても以前のStateは復元されない。StreamのSubscription、AnimationController、TextEditingControllerなど、Stateが保持するリソースはdisposeで確実に解放する必要がある。
-- Navigatorのpopは、Route配下の全Stateを連鎖的にdisposeする。push元の画面は残るが、pop先の画面は完全に破棄される。画面をまたいでStateを保持したい場合は、State以外の場所（Provider / Riverpod / グローバルな状態管理）に置く設計が必要になる。
-- GlobalKeyを使うとStateをdispose無しに移動できるが、これは例外的な手段。意図せずStateが生き残る事故の原因にもなる。
+- 条件分岐や画面遷移でWidgetをツリーから外すと、そのStateは破棄されます。表示を戻しても以前のStateは復元されません。StreamのSubscription、AnimationController、TextEditingControllerなど、Stateが保持するリソースはdisposeで確実に解放する必要があります。
+- Navigatorのpopは、Route配下の全Stateを連鎖的にdisposeします。push元の画面は残りますが、pop先の画面は完全に破棄されます。画面をまたいでStateを保持したい場合は、State以外の場所（Provider / Riverpod / グローバルな状態管理）に置く設計が必要になります。
+- GlobalKeyを使うとStateをdispose無しに移動できますが、これは例外的な手段です。意図せずStateが生き残る事故の原因にもなります。

@@ -10,9 +10,9 @@ Widgetが並び替えられたり、ツリーの別の場所に移動したり�
 
 ### canUpdate の判定ロジック
 
-リビルド時、FlutterはElementを再利用できるかどうかを `Widget.canUpdate` で判定する。
+リビルド時、FlutterはElementを再利用できるかどうかを `Widget.canUpdate` で判定します。
 
-判定基準は `runtimeType（ウィジェットのクラス）` と `key` の2つで、両方が一致する場合のみ既存のElementが再利用される。一致しない場合は古いElementを破棄し、新しいElementを生成する。
+判定基準は `runtimeType（ウィジェットのクラス）` と `key` の2つで、両方が一致する場合のみ既存のElementが再利用されます。一致しない場合は古いElementを破棄し、新しいElementを生成します。
 
 ```dart
 // packages/flutter/lib/src/widgets/framework.dart
@@ -23,7 +23,7 @@ static bool canUpdate(Widget oldWidget, Widget newWidget) {
 ```
 
 :::message
-Key照合が有効な範囲はKeyの種類によって異なり、その差が同一性判断の有効範囲を決める
+Key照合が有効な範囲はKeyの種類によって異なり、その差が同一性判断の有効範囲を決めます
 :::
 
 ### Keyの種類と同一性の有効範囲
@@ -77,9 +77,9 @@ build: A  state=1040413516  depth=153  widgetType=StateTracker  element=Stateful
 | 3行目 | A（移動） | 1（元の位置のまま） | 1040413516（変化なし） |
 
 **確認できたこと：** Keyがない場合、`canUpdate` はruntimeTypeのみで判定するため、
-各位置のElementがそのまま再利用される。
-`didUpdateWidget` でlabelの変化は受け取るが、Stateはlabelに追従せず位置に留まる。
-countとlabelの対応が崩れた状態がそのまま表示されることが確認できる。
+各位置のElementがそのまま再利用されます。
+`didUpdateWidget` でlabelの変化は受け取りますが、Stateはlabelに追従せず位置に留まります。
+countとlabelの対応が崩れた状態がそのまま表示されることが確認できます。
 
 ---
 
@@ -118,17 +118,17 @@ build: A  state=110179758  depth=153  widgetType=StateTracker  element=StatefulE
 | 2行目 | B | 1 | 520698145 |
 | 3行目 | A | 1（Aのまま） | 110179758（Aと一緒に移動） |
 
-**確認できたこと：** ValueKeyがある場合、`canUpdate` は親のchildren内でKey一致するElementを探して再利用する。
-StateはlabelのKeyに紐づいているため、表示位置が変わってもlabelとcountの対応が維持される。
-P1との対比でKeyの有無が何を変えるかが明確になる。
+**確認できたこと：** ValueKeyがある場合、`canUpdate` は親のchildren内でKey一致するElementを探して再利用します。
+StateはlabelのKeyに紐づいているため、表示位置が変わってもlabelとcountの対応が維持されます。
+P1との対比でKeyの有無が何を変えるかが明確になります。
 
 ---
 
 ## P3の前提：GlobalKeyのレジストリと引き取り
 
-GlobalKeyの `canUpdate` 自体はValueKeyと同じ式となる。
+GlobalKeyの `canUpdate` 自体はValueKeyと同じ式となります。
 違うのはKeyの比較が行われるスコープで、ValueKeyが親Elementのchildren内で照合されるのに対し、
-GlobalKeyは `BuildOwner` が保持するレジストリで照合される。
+GlobalKeyは `BuildOwner` が保持するレジストリで照合されます。
 
 ```dart
 // packages/flutter/lib/src/widgets/framework.dart
@@ -137,12 +137,12 @@ class BuildOwner {
 }
 ```
 
-このMapはGlobalKeyとElementを1対1で対応している。
-Elementがマウントされる際に自身をこのレジストリに登録し、unmount時に削除を行う。
-「同じGlobalKeyを同時に2箇所に配置できない」という制約は、このデータ構造が1対1であることから来ている。
+このMapはGlobalKeyとElementを1対1で対応しています。
+Elementがマウントされる際に自身をこのレジストリに登録し、unmount時に削除を行います。
+「同じGlobalKeyを同時に2箇所に配置できない」という制約は、このデータ構造が1対1であることから来ています。
 
 新しい位置にGlobalKey付きWidgetが現れたとき、
-`inflateWidget` はレジストリを引き当て、既存Elementを引き取る分岐に入る。
+`inflateWidget` はレジストリを引き当て、既存Elementを引き取る分岐に入ります。
 
 ```dart
 // packages/flutter/lib/src/widgets/framework.dart
@@ -162,8 +162,8 @@ Element inflateWidget(Widget newWidget, Object? newSlot) {
 ```
 
 引き取られたElementでは `deactivate → activate` のペアが発生し、
-この経路に入る限りElementは `dispose` されない。
-（引き取られずにフレーム末尾まで残ったElementがunmountされる仕組みはCh2で扱った通り）
+この経路に入る限りElementは `dispose` されません。
+（引き取られずにフレーム末尾まで残ったElementがunmountされる仕組みはCh2で扱った通りです）
 
 ---
 
@@ -203,11 +203,11 @@ build: GLOBAL-KEYED  state=31115166  depth=158  widgetType=StateTracker  element
 | Top Slotへ戻す | 31115166（不変） | activate | なし |
 
 **確認できたこと：** GlobalKeyは `BuildOwner._globalKeyRegistry` にElement参照を保持するため、
-配置先の親が変わってもElementは破棄されない。
-`deactivate → activate` のサイクルのみが発生し、disposeは出ない。
-`probeKey.currentContext` が常に同一Elementを指すことで、配置先に関わらずStateへのアクセスが保証される。
+配置先の親が変わってもElementは破棄されません。
+`deactivate → activate` のサイクルのみが発生し、disposeは出ません。
+`probeKey.currentContext` が常に同一Elementを指すことで、配置先に関わらずStateへのアクセスが保証されます。
 P2のValueKeyが「同じ親の中でのKey照合」であるのに対し、
-GlobalKeyは「アプリ全体のレジストリでのKey照合」という対比がここで完成する。
+GlobalKeyは「アプリ全体のレジストリでのKey照合」という対比がここで完成します。
 
 ---
 
@@ -215,21 +215,21 @@ GlobalKeyは「アプリ全体のレジストリでのKey照合」という対�
 
 ### Keyなし運用の許容範囲
 
-Keyなしが問題になるのは「順序や数が動的に変わる」場合に限られる。
-以下の条件がすべて満たせる場合、Keyなしで運用してよい。
+Keyなしが問題になるのは「順序や数が動的に変わる」場合に限られます。
+以下の条件がすべて満たせる場合、Keyなしで運用できます。
 
 - リストの順序が変わらない
 - 条件付き表示による挿入・削除が起きない（またはStatelessWidgetのみ）
 - 各項目のStateが他の項目と混在しても支障がない
 
-逆に言えば、StatefulWidgetを動的なリストに並べる時点でValueKeyは原則必要と考えたほうがよい。
-Keyなしの不具合はログに出づらく、UIの見た目だけが静かに壊れる。
+逆に言えば、StatefulWidgetを動的なリストに並べる時点でValueKeyは原則必要と考えたほうがよいでしょう。
+Keyなしの不具合はログに出づらく、UIの見た目だけが静かに壊れます。
 
 ### ValueKeyの採用条件
 
-ValueKeyに渡す値は項目を一意に識別できるものでなければならない。
+ValueKeyに渡す値は項目を一意に識別できるものでなければなりません。
 インデックス（`ValueKey(index)`）は並び替えに対して無意味なため、
-IDや名前など項目固有の値を使う。
+IDや名前など項目固有の値を使います。
 
 ```dart
 // NG：インデックスはKeyとして機能しない
@@ -243,12 +243,12 @@ ListView.builder(
 )
 ```
 
-また、ValueKeyは同じ親の兄弟間でのみ有効である。
-親をまたいだ同一性の維持が必要な場合はGlobalKeyを検討する。
+また、ValueKeyは同じ親の兄弟間でのみ有効です。
+親をまたいだ同一性の維持が必要な場合はGlobalKeyを検討してください。
 
 ### GlobalKeyの採用条件と制約
 
-GlobalKeyは強力だが、採用前に以下を確認する。
+GlobalKeyは強力ですが、採用前に以下を確認してください。
 
 採用が正当化されるケース：
 
@@ -278,5 +278,5 @@ class _MyWidgetState extends State<MyWidget> {
 
 Keyなし → ValueKey → GlobalKey
 
-GlobalKeyは「最後の手段」として位置づける。
-多くの場合、GlobalKeyで解決しようとしている問題は、状態の持ち方やWidget構造の見直しで回避できる。
+GlobalKeyは「最後の手段」として位置づけます。
+多くの場合、GlobalKeyで解決しようとしている問題は、状態の持ち方やWidget構造の見直しで回避できます。
