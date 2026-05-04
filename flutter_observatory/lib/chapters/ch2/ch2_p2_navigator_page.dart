@@ -21,7 +21,7 @@ class Ch2P2NavigatorPage extends StatelessWidget {
             FilledButton(
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const _SecondRoutePage()),
+                  MaterialPageRoute(builder: (_) => const _PushedPage()),
                 );
               },
               child: const Text('Navigator.push（次画面へ）'),
@@ -38,31 +38,31 @@ class Ch2P2NavigatorPage extends StatelessWidget {
   }
 }
 
-class _SecondRoutePage extends StatefulWidget {
-  const _SecondRoutePage();
+class _PushedPage extends StatefulWidget {
+  const _PushedPage();
 
   @override
-  State<_SecondRoutePage> createState() => _SecondRoutePageState();
+  State<_PushedPage> createState() => _PushedPageState();
 }
 
-class _SecondRoutePageState extends State<_SecondRoutePage> {
+class _PushedPageState extends State<_PushedPage> {
   @override
   void initState() {
     super.initState();
-    debugPrint('SecondRoute: initState');
+    debugPrint('PushedPage: initState');
   }
 
   @override
   void dispose() {
-    debugPrint('SecondRoute: dispose');
+    debugPrint('PushedPage: dispose');
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('SecondRoute: build');
+    debugPrint('PushedPage: build');
     return Scaffold(
-      appBar: AppBar(title: const Text('Second Route')),
+      appBar: AppBar(title: const Text('Pushed Page')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -73,7 +73,7 @@ class _SecondRoutePageState extends State<_SecondRoutePage> {
               '下の Probe の dispose も確認する。',
             ),
             const SizedBox(height: 12),
-            const StateTracker('SECOND-ROUTE-CHILD'),
+            const StateTracker('PUSHED-PAGE-CHILD'),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),

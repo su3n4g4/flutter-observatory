@@ -71,30 +71,30 @@ P1が示しているのは単純ですが重要な事実です。Stateは自分�
 
 **① push（次画面へ遷移）**
 
-「Navigator.push（次画面へ）」ボタンを押します。SecondRoutePageが表示されます。
+「Navigator.push（次画面へ）」ボタンを押します。PushedPageが表示されます。
 
 ```
-SecondRoute: initState
-SecondRoute: build
-initState: SECOND-ROUTE-CHILD  state=295841073
-build: SECOND-ROUTE-CHILD  state=295841073  depth=9  widgetType=StateTracker  element=StatefulElement
+PushedPage: initState
+PushedPage: build
+initState: PUSHED-PAGE-CHILD  state=295841073
+build: PUSHED-PAGE-CHILD  state=295841073  depth=9  widgetType=StateTracker  element=StatefulElement
 ```
 
-SecondRoutePageの State と、その子の StateTracker('SECOND-ROUTE-CHILD') の State が生成されました。ここで重要なのは、前画面（push元）のWidgetにdisposeが出ていないことです。push元のRouteはNavigatorのスタックに残っているため、Elementツリーはそのまま維持されています。
+PushedPageの State と、その子の StateTracker('PUSHED-PAGE-CHILD') の State が生成されました。ここで重要なのは、前画面（push元）のWidgetにdisposeが出ていないことです。push元のRouteはNavigatorのスタックに残っているため、Elementツリーはそのまま維持されています。
 
 **② pop（前画面へ戻る）**
 
-「Navigator.pop（戻る）」ボタンを押します。SecondRoutePageが閉じ、前画面に戻ります。
+「Navigator.pop（戻る）」ボタンを押します。PushedPageが閉じ、前画面に戻ります。
 
 ```
-deactivate: SECOND-ROUTE-CHILD  state=295841073
-SecondRoute: dispose
-dispose: SECOND-ROUTE-CHILD  state=295841073
+deactivate: PUSHED-PAGE-CHILD  state=295841073
+PushedPage: dispose
+dispose: PUSHED-PAGE-CHILD  state=295841073
 ```
 
-SecondRoutePageのStateとStateTracker('SECOND-ROUTE-CHILD')のState、両方にdisposeが呼ばれました。popによってRoute配下のElementツリーがまるごと破棄され、そこに含まれる全てのStateが連鎖的にdisposeされています。
+PushedPageのStateとStateTracker('PUSHED-PAGE-CHILD')のState、両方にdisposeが呼ばれました。popによってRoute配下のElementツリーがまるごと破棄され、そこに含まれる全てのStateが連鎖的にdisposeされています。
 
-| 操作 | SecondRoutePageのState | StateTracker('SECOND-ROUTE-CHILD') |
+| 操作 | PushedPageのState | StateTracker('PUSHED-PAGE-CHILD') |
 | --- | --- | --- |
 | ①push | initState | initState（state=295841073） |
 | ②pop | dispose | deactivate → dispose（state=295841073） |
@@ -104,15 +104,15 @@ SecondRoutePageのStateとStateTracker('SECOND-ROUTE-CHILD')のState、両方に
 もう一度pushすると、全て新しいstate idで initState が出ます。popで破棄されたStateは復元されません。
 
 ```
-SecondRoute: initState
-SecondRoute: build
-initState: SECOND-ROUTE-CHILD  state=641927385
-build: SECOND-ROUTE-CHILD  state=641927385  depth=9  widgetType=StateTracker  element=StatefulElement
+PushedPage: initState
+PushedPage: build
+initState: PUSHED-PAGE-CHILD  state=641927385
+build: PUSHED-PAGE-CHILD  state=641927385  depth=9  widgetType=StateTracker  element=StatefulElement
 ```
 
 state idが295841073から641927385に変わっています。P1と同じ原則が、Route配下のツリー全体に適用されています。
 
-**分かること：** Navigatorのpopは特別なことをしているわけではありません。Route配下のElementツリーをまるごとツリーから外す、というだけです。ツリーから外れたElementのStateが破棄されるのはP1と同じ原則です。違いはスケールだけで、1つのStateに起きることがツリー全体の全Stateに起きます。
+**確認できたこと：** Navigatorのpopは特別なことをしているわけではありません。Route配下のElementツリーをまるごとツリーから外す、というだけです。ツリーから外れたElementのStateが破棄されるのはP1と同じ原則です。違いはスコープだけで、1つのStateに起きることがツリー全体の全Stateに起きます。
 
 ---
 
