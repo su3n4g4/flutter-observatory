@@ -4,7 +4,8 @@ Widgetを書いているつもりでも、実際にツリーを動かしてい�
 
 ## このシリーズの構成
 
-Elementが持つ5つの責務を下記の順で確認していきます。
+こちらの序章ではElementの検証を行う前に前提知識と、検証でのログの読み方について説明をします。
+そのあとにElementが持つ5つの責務を下記の順で確認していきます。
 
 ```
 Ch1: 構造と位置（空間）─ Elementはどこにいるか
@@ -16,9 +17,9 @@ Ch4: 再構築  ─ buildはいつ・何回実行されるか
 Ch5: 依存    ─ 変化はどのElementまで伝播するか
 ```
 
-Ch1とCh2が土台です。この2章が腑に落ちると、Ch3〜Ch5が「存在しているElementに何が起きるか」という問いの延長として読めるようになります。
+Ch1とCh2が土台となり、この2章が腑に落ちると、Ch3〜Ch5が「存在しているElementに何が起きるか」という問いの延長として読めるようになります。
 
-## 検証スタイル
+## 検証方法
 
 検証コードを用いて章ごとに動作を確認していきます。
 
@@ -37,17 +38,19 @@ Ch1とCh2が土台です。この2章が腑に落ちると、Ch3〜Ch5が「存�
 手元で動かしながら読むと、ログの意味がより実感を持って確認できます。
 ▶ [https://su3n4g4.github.io/flutter-observatory/](https://su3n4g4.github.io/flutter-observatory/)
 
+次のセクションから前提知識の説明に入ります。
+
 ---
 
-# 前提整理：Widget / Element / State の役割
+## 前提知識1：Widget / Element / State の役割
 
-## Widget — 「何を作るかの定義」
+### Widget — 「何を作るかの定義」
 
 Widgetはimmutableな設計図です。自分自身では画面上に何も持たず、「こういう見た目・振る舞いにしてほしい」という宣言を保持するだけです。`build()`が呼ばれるたびに新しいインスタンスが作られても問題ないように、軽量に設計されています。
 
 Widgetが持つのはコンストラクタで受け取った設定値（`label`、`color`、`padding`など）と`createElement()`メソッドだけです。Widget自身はツリー上に位置を持たず、状態も持ちません。
 
-## Element — 「ツリー上の実体」
+### Element — 「ツリー上の実体」
 
 ElementはWidgetと1対1で生成され、ツリー上に実際に位置を占める存在です。親子関係、位置（slot/index）、ライフサイクルの管理をすべて担います。
 
@@ -63,7 +66,7 @@ Elementの責務は5つに分かれ、それぞれがこのシリーズの各章
 
 重要なのは、ElementはWidgetが差し替わっても生き続けるということです。条件が満たされれば既存のElementに新しいWidgetを渡すだけで、Element（とState）は同一インスタンスのまま再利用されます。その条件が何かは次の前提整理で見ていきます。
 
-## State — 「Elementに管理される可変の状態」
+### State — 「Elementに管理される可変の状態」
 
 StateはStatefulWidgetに対応するElementが所有する、可変の状態です。自力では生まれも死にもできず、Elementのライフサイクルに完全に従属します。
 
@@ -71,7 +74,7 @@ StateはStatefulWidgetに対応するElementが所有する、可変の状態で
 
 具体的にどのElementがどのタイミングでStateのコールバックを呼ぶかは、次の前提整理で見ていきます。
 
-## 3者の関係をひと言で
+### 3者の関係
 
 **Widget**は「こう作ってほしい」という定義を渡すだけで、渡したら役目を終えます。**Element**はその定義を受け取ってツリー上に実体を持ち、子の生成・更新・破棄をすべてFlutter内部の`updateChild`メソッドで管理します。**State**はElementに所有され、Elementのライフサイクルイベントに応じてコールバックが呼ばれる受動的な存在です。
 
@@ -79,45 +82,36 @@ StateはStatefulWidgetに対応するElementが所有する、可変の状態で
 
 ---
 
-# 前提整理：Element.updateChild の動き
+## 前提知識2：Element.updateChild の動き
 
 Elementがツリー上で子を管理するとき、その判断はすべて`updateChild`という1つのメソッドに集約されています。「子を新しく作るか、既存のものを再利用するか、破棄するか」——この章以降で観測するすべての現象（位置がずれる、disposeが呼ばれる、Stateが維持される）は、ここに帰着します。`updateChild`の分岐を知っておくと、ログで見える現象の理由が説明できるようになります。
 
 `updateChild`は`packages/flutter/lib/src/widgets/framework.dart`に実装されています。
 
-## 4つの分岐
+### 4つの分岐
 
-`updateChild(child, newWidget, slot)`は引数の組み合わせで4つに分岐します。
+`updateChild`は3つの引数を取ります。
+
+- **`child`**：現在その位置に存在する子Element。まだ何もなければnull
+- **`newWidget`**：今回のbuildが返した新しいWidget。その位置に何も置かなければnull
+- **`slot`**：親の中でこの子が占める位置情報（インデックスなど）。分岐の判断には使われない
+
+分岐の中で呼ばれるメソッドの意味は次のとおりです。
+
+- **`inflateWidget`**：WidgetからElementを新規生成し、ツリーに接続する。`initState`が呼ばれる
+- **`deactivateChild`**：ElementをツリーからDeactivate状態にする。同フレーム内で再接続されなければ`dispose`が呼ばれてStateが破棄される
+- **`update`**：既存のElementに新しいWidgetを渡す。`didUpdateWidget`が呼ばれる
+
+この組み合わせで4つに分岐します。
 
 | child | newWidget | 動作 |
 | --- | --- | --- |
 | null | null | 何もしない |
-| null | non-null | `inflateWidget`（新規生成） |
-| non-null | null | `deactivateChild`（破棄） |
-| non-null | non-null | `canUpdate`→ true なら`update`、false なら deactivate + inflate |
+| null | non-null | `inflateWidget`（Elementを新規生成） |
+| non-null | null | `deactivateChild`（Elementを破棄） |
+| non-null | non-null | `canUpdate`が true なら`update`（既存Elementを再利用）、false なら`deactivateChild`して`inflateWidget`（作り直し） |
 
-```
-updateChild(child, newWidget, slot)
-│
-├─ newWidget == null
-│    └─ child があれば deactivateChild(child)  → dispose へ
-│
-├─ child == null
-│    └─ inflateWidget(newWidget, slot)  → 新規 Element 生成
-│
-└─ child も newWidget も non-null
-     ├─ child.widget == newWidget（同一インスタンス）
-     │    └─ slot のみ更新、何もしない
-     │
-     ├─ Widget.canUpdate == true
-     │    └─ child.update(newWidget)  → didUpdateWidget が呼ばれる
-     │
-     └─ Widget.canUpdate == false
-          ├─ deactivateChild(child)
-          └─ inflateWidget(newWidget, slot)  → 新規 Element 生成
-```
-
-## Widget.canUpdate の判定
+### Widget.canUpdate の判定
 
 ```dart
 // packages/flutter/lib/src/widgets/framework.dart
@@ -131,13 +125,13 @@ static bool canUpdate(Widget oldWidget, Widget newWidget) {
 
 ---
 
-# 前提整理：State が作られるまでの流れ
+## 前提知識3：State が作られるまでの流れ
 
-## 起点：親Elementの`updateChild`
+### 起点：親Elementの`updateChild`
 
 すべては親Elementが`updateChild(null, newWidget, slot)`を呼ぶところから始まります。`child`がnullで`newWidget`が非nullのとき、「この位置にまだ子がいないので新しく作る」という分岐に入り、`inflateWidget`が呼ばれます。
 
-## Elementの生成：`createElement()`
+### Elementの生成：`createElement()`
 
 `inflateWidget`の中で`newWidget.createElement()`が実行されます。Widgetの種類に応じたElementが生まれます。
 
@@ -145,11 +139,11 @@ static bool canUpdate(Widget oldWidget, Widget newWidget) {
 - `StatelessWidget` → `StatelessElement`
 - `Padding`などの`SingleChildRenderObjectWidget` → `SingleChildRenderObjectElement`
 
-## Stateの生成：StatefulElementのコンストラクタ
+### Stateの生成：StatefulElementのコンストラクタ
 
 `StatefulElement`が特別なのはここです。コンストラクタの中で`widget.createState()`を呼び、Stateインスタンスをフィールド`_state`に保持します。Stateは`mount`よりも前、Elementが生まれた瞬間に作られます。
 
-## ツリーへの接続：`mount` → `_firstBuild`
+### ツリーへの接続：`mount` → `_firstBuild`
 
 Elementが生成されると、`inflateWidget`は続けて`element.mount(parent, slot)`を呼びます。ここでElementがツリーに接続され、`_firstBuild()`の中でStateのコールバックが順に発火します。
 
@@ -157,11 +151,11 @@ Elementが生成されると、`inflateWidget`は続けて`element.mount(parent,
 2. `state.didChangeDependencies()` — initState直後に必ず呼ばれる（詳細はCh5で扱います）
 3. `state.build(context)` — 最初のWidgetツリーを返す
 
-## 再帰：build()の戻り値が次のupdateChildへ
+### 再帰：build()の戻り値が次のupdateChildへ
 
 `state.build(context)`が返したWidgetは、今度はこのStatefulElement自身が`updateChild(_child, builtWidget, slot)`を呼ぶときの`newWidget`になります。初回は`_child`がnullなので再び`inflateWidget`に入り、子のElementが生成されます。このサイクルがツリーの末端まで再帰的に繰り返されます。
 
-## Stateのコールバックと呼び出し元
+### Stateのコールバックと呼び出し元
 
 ここまでの流れを整理すると、Stateの各コールバックはすべてElementのメソッドから呼ばれていることがわかります。
 
@@ -187,11 +181,11 @@ Elementが生成されると、`inflateWidget`は続けて`element.mount(parent,
 
 ---
 
-# StateTrackerとログの読み方
+## StateTrackerとログの読み方
 
-ここまでの前提整理で登場したElementのメソッド（`_firstBuild`、`update`、`deactivateChild`、`unmount`など）は、実際の検証では直接見えません。代わりに、これらのメソッドが呼び出すState側のコールバックがログとして観測できます。それを出力するのが`StateTracker`です。
+ここまでの前提知識で登場したElementのメソッド（`_firstBuild`、`update`、`deactivateChild`、`unmount`など）は、実際の検証では直接見えません。代わりに、これらのメソッドが呼び出すState側のコールバックがログとして観測できます。それを出力するのが`StateTracker`です。
 
-## StateTrackerとは
+### StateTrackerとは
 
 全章を通じて`StateTracker`という確認用ウィジェットを使います。観察対象であると同時に、ライフサイクルイベントをログに出力する観察装置でもあります。
 
@@ -220,22 +214,24 @@ deactivate: A  state=1234
 dispose: A  state=1234
 ```
 
-## ログの読み方
+### ログの読み方
 
-各ログが何の確認につながるかを先に整理しておきます。
+ログの解釈の対応表です。「このログが出た＝Elementについて何が言えるか」を整理します。
 
 | ログ | 意味 | 何の確認になるか |
 | --- | --- | --- |
 | `initState` | 新しいStateが生成された | Elementが新規作成された |
-| `dispose` | Stateが破棄された | Elementがツリーから永久に外れた |
-| `deactivate` → `activate` | 一時切り離し→再接続 | disposeなしで移動した（GlobalKey） |
 | `didUpdateWidget` | 同じElementに別のWidgetが渡された | 位置ベースで再利用された |
+| `deactivate` → `activate` | 一時切り離し→再接続 | disposeなしで移動した（GlobalKey） |
+| `dispose` | Stateが破棄された | Elementがツリーから永久に外れた |
 | `state=` の値が変わる | 別のインスタンスが生成された | Elementが作り直された |
 | `state=` の値が変わらない | 同じインスタンスが使われた | Elementが再利用された |
 
 特に`state=`の値（StateインスタンスのhashCode）が変わるかどうかが、多くのシナリオで判断の基準になります。同じ値であればElementが再利用され、変わっていればElementが作り直されています。
 
-## ログと呼び出し元の対応
+### ログと呼び出し元の対応
+
+実装視点の対応表です。フレームワーク内部のどのメソッドがこのログを呼び出しているかを示します。
 
 | StateTrackerのログ | 呼び出し元 | タイミング |
 | --- | --- | --- |
@@ -248,4 +244,4 @@ dispose: A  state=1234
 
 ---
 
-以上が検証に入る前の前提整理です。Ch1からは実際の観測に入ります。
+以上が検証に入る前の前提知識となります。Ch1からは実際の検証に入ります。

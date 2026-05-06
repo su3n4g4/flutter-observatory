@@ -2,17 +2,17 @@
 
 ▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-observatory/tree/main/flutter_observatory/lib/chapters/ch1)　▶ [検証画面](https://su3n4g4.github.io/flutter-observatory/)
 
-## 章の中心的な問い
+## この章で確かめること
 
 **Elementは位置と親をどう使ってWidgetを管理しているのか？**
 
 ---
 
-## 基本：同じ親の中で位置が変わるとき
+## 同じ親の中で位置が変わるとき
 
 まず「同じ親のColumn内で子の並びや数が変わったとき、Elementはどう反応するか」を確認します。
 
-### P1: Reorder（Keyなし）
+### P1: 並べ替え（Keyなし）
 
 **① 初期表示**
 
@@ -58,11 +58,11 @@ didUpdateWidget: A -> C  state=255414316
 
 ②と同じく、Elementは位置に留まったままWidgetが差し替わります。state idは①から一度も変わっていません。
 
-**分かること：** Elementは位置に留まり続け、Widgetの中身だけが入れ替わります。runtimeTypeが同じであれば、Elementは破棄されず再利用されます。
+**確認できたこと：** Elementは位置に留まり続け、Widgetの中身だけが入れ替わります。runtimeTypeが同じであれば、Elementは破棄されず再利用されます。
 
 ---
 
-### P2: Conditional Insert/Remove
+### P2: 条件付き挿入・削除
 
 **① 初期表示**
 
@@ -117,21 +117,21 @@ dispose: C  state=163847295
 
 位置1・2はdidUpdateWidgetでWidgetが差し替わりました。位置3のElementはツリーから除去され、disposeが呼ばれました。Elementがツリーから完全に外れるとStateが破棄されます。
 
-**分かること：** 子リストの長さが変わっても、先頭から位置ベースで順にupdateが走る原則は同じです。余りが出た末尾でだけ生成（initState）や破棄（dispose）が起きます。
+**確認できたこと：** 子リストの長さが変わっても、先頭から位置ベースで順にupdateが走る原則は同じです。余りが出た末尾でだけ生成（initState）や破棄（dispose）が起きます。
 
 ---
 
-### 基本の解釈
+### この検証からわかること
 
 P1とP2に共通しているのは、「同じ親の中で、同じ位置に同じruntimeTypeのWidgetが来れば、Elementは再利用される」というルールです。Elementは位置に紐づいていて、Widgetの中身が変わっても位置が同じなら生き残ります。
 
 ---
 
-## 派生：親そのものが変わるとき
+## 親そのものが変わるとき
 
 基本ルールが「同じ親の中での再利用」だと分かったところで、次は「では親が変わったらどうなるのか？」確認していきます。
 
-### P3: Move Between Parents
+### P3: 親の切り替え
 
 **① 初期表示**
 
@@ -172,19 +172,19 @@ initState: P  state=915438672
 
 毎回state idが変わります。Elementが再利用されていません。
 
-**分かること：** 親が変わると、Elementは再利用されず破棄・再生成されます。P1・P2で見た位置ベースの再利用は「同じ親の配下」というスコープに閉じています。これがCh1の確定事実「親が変わればElementは破棄される」の根拠です。
+**確認できたこと：** 親が変わると、Elementは再利用されず破棄・再生成されます。P1・P2で見た位置ベースの再利用は「同じ親の配下」というスコープに閉じています。
 
 ---
 
-### 派生の解釈
+### この検証からわかること
 
-基本で見た「位置が同じなら再利用される」には前提条件があります。それは親が同じであることです。親が変わった時点で、旧ElementのStateはdisposeで破棄され、新しいElementがinitStateから始まります。これがCh1の確定事実「親が変わればElementは破棄される」の根拠です。
+基本で見た「位置が同じなら再利用される」には前提条件があります。それは親が同じであることです。親が変わった時点で、旧ElementのStateはdisposeで破棄され、新しいElementがinitStateから始まります。
 
 ---
 
-## 補足：Keyがあると位置ルールはどう変わるか（→ Ch3）
+## Keyがあると位置ルールはどう変わるか（→ Ch3）
 
-### P1-b: Reorder（Keyあり）
+### P1-b: 並べ替え（Keyあり）
 
 **① 初期表示**
 
@@ -219,11 +219,22 @@ P1（Keyなし）と比較します。
 
 P1では`didUpdateWidget: A -> C`のように、位置に残ったElementが異なるlabelのWidgetを受け取っています。P1-bでは`didUpdateWidget: C -> C`のように、Elementは同じlabelのWidgetを受け取っています。ValueKeyがあると、ElementはKeyに一致する相手を探して紐づいて移動するため、新しい位置でも同じlabelのWidgetに更新されます。state idがlabelと一緒に移動しているのがその証拠です。
 
-**分かること：** Keyがあると、位置ベースの再利用ルールが変わります。Elementはlabel（Key）に紐づいて移動します。この判定メカニズムの詳細はCh3で扱います。
+**確認できたこと：** Keyがあると、位置ベースの再利用ルールが変わります。Elementはlabel（Key）に紐づいて移動します。この判定メカニズムの詳細はCh3で扱います。
 
 ---
 
-## 設計上の注意点
+## 検証結果まとめ
+
+| シナリオ | 確認できたこと |
+| --- | --- |
+| P1: 並べ替え（Keyなし） | 位置が同じでruntimeTypeが一致すればElementは再利用される。Widgetのlabelが変わってもdidUpdateWidgetで差し替えが起き、disposeは出ない |
+| P2: 条件付き挿入・削除 | 先頭から位置ベースでupdateが走る。末尾で余った部分だけinitState（生成）またはdispose（破棄）が起きる |
+| P3: 親の切り替え | 親が変わるとElementは再利用されない。dispose → initStateで毎回新しいStateが生成される |
+| P1-b: 並べ替え（Keyあり） | ValueKeyがあるとElementはKeyに紐づいて移動する。StateがlabelのKeyに追従するため、countとlabelの対応が維持される |
+
+---
+
+## 実装時に気をつけること
 
 - 条件分岐でWidgetを出し入れすると、除去されたElementのStateは破棄されます。表示を戻しても以前のStateは復元されません。
 - Widgetの親を動的に変える構成は、意図しないState破棄を招きます。同じWidget記述でも親が異なればElementは再生成されます。

@@ -35,8 +35,8 @@ class Ch3CatalogPage extends StatelessWidget {
           children: [
             const Text('目的：Element の同一性管理を Key 中心に観測する。'),
             const SizedBox(height: 16),
-            navButton('P1: Reorder（Keyなし）', const Ch3P1NoKeyPage()),
-            navButton('P2: Reorder（ValueKey）', const Ch3P2ValueKeyPage()),
+            navButton('P1: 並べ替え（Keyなし）', const Ch3P1NoKeyPage()),
+            navButton('P2: 並べ替え（ValueKey）', const Ch3P2ValueKeyPage()),
             navButton('P3: GlobalKey で配置先を切り替える', const Ch3P3GlobalKeyPage()),
           ],
         ),

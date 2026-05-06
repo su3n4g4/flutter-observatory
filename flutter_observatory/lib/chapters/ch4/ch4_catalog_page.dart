@@ -33,7 +33,7 @@ class Ch4CatalogPage extends StatelessWidget {
           children: [
             const Text('目的：再構築スケジューリングを観測し、dirty 登録と frame 単位の rebuild を確認する。'),
             const SizedBox(height: 16),
-            navButton('P1: setState と Build Scheduling', const Ch4P1RebuildSchedulingPage()),
+            navButton('P1: setState と再構築スケジューリング', const Ch4P1RebuildSchedulingPage()),
           ],
         ),
       ),

@@ -2,7 +2,7 @@
 
 ▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-observatory/tree/main/flutter_observatory/lib/chapters/ch5)　▶ [検証画面](https://su3n4g4.github.io/flutter-observatory/)
 
-## 章の中心的な問い
+## この章で確かめること
 
 **ツリー内で離れた場所にあるWidget同士は、どのように値を共有し、どの範囲までrebuildが届くのか？**
 
@@ -10,9 +10,10 @@
 
 ## 前提：InheritedWidgetとNotificationは何をしているのか
 
+こちらも検証に入る前にInheritedWidgeとNotificationの前提知識から説明していきます。
 `setState`はElement自身を再構築するための仕組みでした（Ch4）。しかし実アプリでは、自分自身ではなくツリーの離れた場所にあるWidgetに変更を届けたい場面があります。親が持つテーマ色を深い子孫で使いたい、子孫でのイベントを親に知らせたい、といった要求です。
 
-Flutterはこれを2つの仕組みで解きます。
+Flutterはこれを2つの仕組みで解決します。
 
 - **InheritedWidget**：親から子孫への「下方向」の値の供給
 - **Notification**：子孫から親への「上方向」のイベントの伝播
@@ -27,6 +28,7 @@ mountされた各Elementは、Widget本体のツリー（親子関係）とは�
 - **`_notificationTree`**：祖先の`NotificationListener`を辿るための連結リスト
 
 どちらもmountのタイミングで親から引き継いで構築されます。違いは「自分自身がそこに登場するかどうか」であり、これがそのまま2つの経路の性格を決めています。
+次のセクションでそれぞれの仕組みの詳細をみていきます。
 
 ### InheritedWidget：祖先索引（mount時）と依存登録（build時）の二段構え
 
@@ -34,7 +36,11 @@ InheritedWidgetは「スコープの公開」と「差分判定」を担いま�
 
 **段階1：祖先の索引化（mount時）**
 
-Elementがmountされる際、`_updateInheritance`が呼ばれて親から`_inheritedWidgets`マップ（Type → InheritedElement）をコピーします。InheritedElement自身は、このマップに自分を加えてから子に渡します。これによって任意のElementから「自分の祖先にあるInheritedWidget」をO(1)で型引きできるようになります。
+まずは、Elementがmountされる際に、任意のElementが祖先のInheritedWidgetを型名で引けるように準備をします。
+下記に記載のソースはこのようにマップを作成しています。
+- 親の_inheritedWidgetsマップ（`Type` → `InheritedElement`）をコピーする
+- `InheritedElement`のみ：コピーしたマップに自分自身を追加する
+- 更新済みのマップを子に渡す
 
 ```dart
 // Element._updateInheritance()
@@ -56,7 +62,11 @@ void _updateInheritance() {
 
 **段階2：依存登録（build時）**
 
-実際に「このInheritedWidgetが更新されたらrebuildされる側」として登録されるのは、`build()`内で`dependOnInheritedWidgetOfExactType<T>()`が呼ばれた瞬間です。段階1で作った`_inheritedWidgets`マップから祖先のInheritedElementを引き、その`_dependents`に自分自身を追加します。
+次に、`build()`内で`of()`が呼ばれた瞬間に、呼び出し元のElementを「InheritedWidgetが更新されたらrebuildすべき対象」として登録します。
+下記に記載のソースはこのように依存登録を行っています。
+
+- 段階1で作成したマップから祖先のInheritedElementを取得する
+- 呼び出し元のElement（`this`）を祖先の`_dependents`（InheritedElementが保持する通知先リスト）に追加する
 
 ```dart
 // Element.dependOnInheritedWidgetOfExactType<T>()
@@ -81,9 +91,15 @@ InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? as
 }
 ```
 
-`ancestor.updateDependencies(this, aspect)`で、呼び出し元のElement（`this`）がInheritedElementの`_dependents`に追加されます。重要なのは、この登録はWidget定義時でもmount時でもなく、**`build()`内で`dependOn`が呼ばれた時点**でしか起きないということです。同じElementでも、build内で`of()`を呼んだフレームでは`_dependents`に載りますが、条件分岐で呼ばなかったフレームでは依存を失います。**どのElementが通知を受け取るかはWidgetの静的な構造からは決まらず、build()の実行履歴によって決まります。**
+ここで重要なのは登録のタイミングです。
+
+- 登録が起きるのは`build()`内で`dependOn`が呼ばれた時点のみ（Widget定義時でもmount時でもない）
+- 同じElementでも、`of()`を呼ばなかったフレームでは依存を失う
+
+**どのElementが通知を受け取るかはWidgetの静的な構造からは決まらず、build()の実行履歴によって決まります。**
 
 更新時の通知経路は次のとおりです。
+値が変化したかどうかは`updateShouldNotify`メソッドで判定され、`true`を返した場合のみ`notifyClients`が呼ばれます。
 
 ```dart
 @override
@@ -105,7 +121,7 @@ void notifyClients(InheritedWidget oldWidget) {
 }
 ```
 
-`_dependents.keys`を走査して、登録済みElementにのみ`markNeedsBuild`を流します。ここに載っていないElementは、`updateShouldNotify`が`true`を返しても何も起きません。
+`_dependents.keys`を走査して、登録済みElementにのみ`markNeedsBuild`を流します。ここに載っていないElementには通知が届きません。
 
 ### Notification：構造解決のみ（mount時）、依存登録なし
 
@@ -169,7 +185,7 @@ void dispatchNotification(Notification notification) {
 
 InheritedWidgetは`_dependents`という索引を持つことで、Widgetツリーの親子関係とは独立して通知先を絞れます。対してNotificationは依存登録機構を持たず、rebuildの範囲は捕捉側が`setState`を呼ぶかどうか・どのElementで呼ぶかだけで決まります。
 
-### ログの仕込み方
+## ログの仕込み方
 
 ここまでで、2つの仕組みの違いが分かりました。
 
@@ -177,9 +193,9 @@ InheritedWidgetは`_dependents`という索引を持つことで、Widgetツリ�
 - Notificationは依存登録機構を持たず、宛先はmount時に決まる`_notificationTree`の構造で固定されます
 - rebuildを起こすかどうかも、前者は索引経由で自動、後者は捕捉側の`setState`次第です
 
-これを観測するには、「誰が、いつ、何回rebuildされたか」を全Widgetに仕込めばよいです。ただし観測したい主張は2つの仕組みで別物なので、ログも仕組みごとに分けて設計します。
+これを確認するには、「誰が、いつ、何回rebuildされたか」のログを全Widgetに仕込みます。ただし確認したい事柄は2つの仕組みで異なるので、ログも仕組みごとに分けて設計します。
 
-### InheritedWidget用：依存登録の有無がrebuildを分けることを観測する
+### InheritedWidget用：依存登録の有無がrebuildを分けることを確認する
 
 InheritedWidget側で確かめたいのは「`of()`を呼んだElementだけがrebuildされる」という選択性です。これを観測するには、build回数の差と、`_dependents`への通知が走る直前の差分判定タイミングを両方押さえる必要があります。
 
@@ -260,7 +276,7 @@ InheritedWidget側と同じ`[BUILD]`ログを、捕捉側ページ・dispatch元
 
 ---
 
-## 基本：dependOnを呼んだ子だけがrebuildされる
+## dependOnを呼んだ子だけがrebuildされる
 
 前提で「依存登録による選択的rebuild」の仕組みを見ました。ここではそれを実際のログで確認します。
 
@@ -460,7 +476,7 @@ setState
 
 ---
 
-## 派生：Notificationには登録機構がない
+## Notificationには登録機構がない
 
 基本では、InheritedWidgetが`_dependents`という独自の索引で通知先を絞ることを確認しました。では、同じ「ツリーをまたいだ通信」の仕組みでも、登録機構を持たないNotificationではrebuildの範囲がどう決まるのでしょうか。前提で見た「捕捉側の`setState`に依存する」ことをログで確認します。
 
@@ -669,7 +685,7 @@ Notification経路にはInheritedWidgetでいう`_dependents`のような選択�
 
 independentが`[BUILD]`を出したのは、**Notificationに反応したからではなく**、親の`setState`によって通常のrebuild経路に乗っただけです。ログ上は`[NOTIFICATION] received`と`[BUILD] independent widget`が連続して見えますが、両者の因果関係は「Notification → independent」ではなく「Notification → setState → 親rebuild → 配下全部」という二段構えになっています。**Notification自体には範囲を絞る仕組みがないので、rebuildの広さは捕捉側がどのElementで`setState`を呼ぶかだけで決まります。**
 
-### 基本・派生の解釈
+### この検証からわかること
 
 基本と派生を合わせて確認できたのは、「ツリーをまたいだ通信」と一口に言っても、rebuildの範囲を決める仕組みは両者で全く異なるということです。
 
@@ -680,7 +696,16 @@ independentが`[BUILD]`を出したのは、**Notificationに反応したから�
 
 ---
 
-## 設計上の注意点
+## 検証結果まとめ
+
+| シナリオ | 確認できたこと |
+| --- | --- |
+| 基本: dependOnを呼んだ子だけrebuildされる | of()を呼んだElementだけが_dependentsに登録される。updateShouldNotifyがtrueを返しても、未登録のElementには通知が届かずrebuildされない |
+| 派生: Notificationには登録機構がない | Notification自体はrebuildを起こさない。捕捉側のonNotification内でsetStateを呼んだ瞬間に通常のrebuildパスが起動し、捕捉側Element以下が依存の有無に関係なく全て巻き込まれる |
+
+---
+
+## 実装時に気をつけること
 
 - InheritedWidgetの`_dependents`による選択的rebuildは、`of()`を呼んだ時点でしか登録されません。`build()`内で条件分岐して`of()`を呼ばなかったフレームがあると、そのElementは依存を失った状態になります。次のbuildで再度`of()`を通らない限り、更新通知は届きません。条件付きで依存を扱いたい場合でも、`of()`は無条件に呼ぶのが安全です。
 - Notificationはrebuild範囲を絞る仕組みを持たないため、`onNotification`で`setState`を呼ぶとListener以下すべてがrebuild対象になります。細かい範囲だけを更新したいなら、Notificationで親に伝えた後、親側でInheritedWidgetや状態管理パッケージ経由で配信する二段構えが必要になります。

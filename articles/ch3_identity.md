@@ -2,11 +2,13 @@
 
 ▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-observatory/tree/main/flutter_observatory/lib/chapters/ch3)　▶ [検証画面](https://su3n4g4.github.io/flutter-observatory/)
 
-## 章の中心的な問い
+## この章で確かめること
 
-Widgetが並び替えられたり、ツリーの別の場所に移動したりするとき、FlutterはどうやってElementの「同一性」を判断するのか？
+FlutterはどうやってElementの同一性を判断するのか？
 
 ## 前提知識
+
+検証に入る前に、同一性を判断する際のロジックを改めてみていきます。
 
 ### canUpdate の判定ロジック
 
@@ -41,34 +43,11 @@ Key照合が有効な範囲はKeyの種類によって異なり、その差が�
 
 ---
 
-## P1｜Keyなしでリストをreverse
+### P1: Keyなしで並べ替え
 
-**検証内容：** Keyがないとき、`canUpdate` はruntimeTypeのみで判定し、位置ベースでElementを再利用する
+Ch1 P1 と同じ操作です。ここでは結果だけ整理します。
 
-**操作：** Reverse ボタンを押す
-
-**ログ：**
-
-```
-# 初期表示
-initState: A  state=997303568
-build: A  state=997303568  depth=153  widgetType=StateTracker  element=StatefulElement
-initState: B  state=545823583
-build: B  state=545823583  depth=153  widgetType=StateTracker  element=StatefulElement
-initState: C  state=1040413516
-build: C  state=1040413516  depth=153  widgetType=StateTracker  element=StatefulElement
-
-# Reverse ボタン押下後
-didUpdateWidget: A -> C  state=997303568
-build: C  state=997303568  depth=153  widgetType=StateTracker  element=StatefulElement
-didUpdateWidget: B -> B  state=545823583
-build: B  state=545823583  depth=153  widgetType=StateTracker  element=StatefulElement
-didUpdateWidget: C -> A  state=1040413516
-build: A  state=1040413516  depth=153  widgetType=StateTracker  element=StatefulElement
-# state hashCodeは変化なし（Elementが位置で再利用された）
-```
-
-**観察まとめ：**
+Ch1では「Elementは位置に紐づく」という位置管理の観点から確認しました。この章では同一性管理の観点から見ます。Keyがない場合、`canUpdate` はruntimeTypeのみで判定するため、Elementの同一性は位置で決まります。これがP2（ValueKey）との対比基準となります。
 
 | 操作後の表示位置 | label | count（State） | state hashCode |
 | --- | --- | --- | --- |
@@ -76,41 +55,39 @@ build: A  state=1040413516  depth=153  widgetType=StateTracker  element=Stateful
 | 2行目 | B（不変） | 1 | 545823583 |
 | 3行目 | A（移動） | 1（元の位置のまま） | 1040413516（変化なし） |
 
-**確認できたこと：** Keyがない場合、`canUpdate` はruntimeTypeのみで判定するため、
-各位置のElementがそのまま再利用されます。
-`didUpdateWidget` でlabelの変化は受け取りますが、Stateはlabelに追従せず位置に留まります。
-countとlabelの対応が崩れた状態がそのまま表示されることが確認できます。
+**確認できたこと：** Keyがない場合、Stateは位置に留まりlabelに追従しません。
 
 ---
 
-## P2｜ValueKeyありでリストをreverse
+### P2: ValueKeyありで並べ替え
 
-**検証内容：** ValueKeyがあるとき、`canUpdate` はKey一致で判定し、StateがlabelのKeyに紐づいて移動する
+**① 初期表示**
 
-**操作：** Reverse ボタンを押す
-
-**ログ：**
+画面を開きます。ValueKey付きStateTracker が A・B・C の順に表示されます。
 
 ```
-# 初期表示
 initState: A  state=110179758
 build: A  state=110179758  depth=153  widgetType=StateTracker  element=StatefulElement
 initState: B  state=520698145
 build: B  state=520698145  depth=153  widgetType=StateTracker  element=StatefulElement
 initState: C  state=277223098
 build: C  state=277223098  depth=153  widgetType=StateTracker  element=StatefulElement
+```
 
-# Reverse ボタン押下後
+**② Reverseボタン押下**
+
+「Reverse」ボタンを押します。表示がC・B・Aに入れ替わります。
+
+```
 didUpdateWidget: C -> C  state=277223098
 build: C  state=277223098  depth=153  widgetType=StateTracker  element=StatefulElement
 didUpdateWidget: B -> B  state=520698145
 build: B  state=520698145  depth=153  widgetType=StateTracker  element=StatefulElement
 didUpdateWidget: A -> A  state=110179758
 build: A  state=110179758  depth=153  widgetType=StateTracker  element=StatefulElement
-# state hashCodeは変化なし（ElementがlabelのKeyに追従して移動した）
 ```
 
-**観察まとめ：**
+各位置に何が起きたかを整理します。
 
 | 操作後の表示位置 | label | count（State） | state hashCode |
 | --- | --- | --- | --- |
@@ -124,7 +101,7 @@ P1との対比でKeyの有無が何を変えるかが明確になります。
 
 ---
 
-## P3の前提：GlobalKeyのレジストリと引き取り
+### P3の前提：GlobalKeyのレジストリと引き取り
 
 GlobalKeyの `canUpdate` 自体はValueKeyと同じ式となります。
 違うのはKeyの比較が行われるスコープで、ValueKeyが親Elementのchildren内で照合されるのに対し、
@@ -167,34 +144,11 @@ Element inflateWidget(Widget newWidget, Object? newSlot) {
 
 ---
 
-## P3｜GlobalKeyの参照保持と配置先切り替え
+### P3: GlobalKeyの参照保持と配置先切り替え
 
-**検証内容：** GlobalKeyはアプリ全体のレジストリにElement参照を保持し、配置先の親が変わってもElementとStateの同一性を維持する
+Ch2 P3 と同じ操作です。ここでは結果だけ整理します。
 
-**操作：** GlobalKey付きStateTrackerをTop Slot → Bottom Slot → Top Slotと切り替える
-
-:::message
-GlobalKeyの本質は「どのスロット（位置）に置かれていても、同じElementを指し続ける」という参照保持にある。
-位置が変わることを起こさないとその能力が検証できないため、スロット切り替えが最小操作となる。
-:::
-
-**ログ：**
-
-```
-# 初期表示
-initState: GLOBAL-KEYED  state=31115166
-build: GLOBAL-KEYED  state=31115166  depth=158  widgetType=StateTracker  element=StatefulElement
-
-# 「配置先を切り替える」ボタン押下後
-deactivate: GLOBAL-KEYED  state=31115166
-activate: GLOBAL-KEYED  state=31115166
-didUpdateWidget: GLOBAL-KEYED -> GLOBAL-KEYED  state=31115166
-build: GLOBAL-KEYED  state=31115166  depth=158  widgetType=StateTracker  element=StatefulElement
-# initState / dispose は発火しない
-# state hashCodeは変化なし（同一Elementが再利用される）
-```
-
-**観察まとめ：**
+Ch2では「disposeが出ない」という事実をライフサイクルの観点から確認しました。この章では同じ現象を同一性管理の観点から見ます。`BuildOwner._globalKeyRegistry` がElement参照をアプリ全体で保持しているため、配置先の親が変わってもElementは同一であり続けます。P2のValueKeyが「同じ親のchildren内でのKey照合」であるのに対し、GlobalKeyは「アプリ全体のレジストリでのKey照合」という対比がここで完成します。
 
 | タイミング | state hashCode | last event | dispose |
 | --- | --- | --- | --- |
@@ -202,16 +156,21 @@ build: GLOBAL-KEYED  state=31115166  depth=158  widgetType=StateTracker  element
 | Bottom Slotへ切り替え | 31115166（不変） | activate | なし |
 | Top Slotへ戻す | 31115166（不変） | activate | なし |
 
-**確認できたこと：** GlobalKeyは `BuildOwner._globalKeyRegistry` にElement参照を保持するため、
-配置先の親が変わってもElementは破棄されません。
-`deactivate → activate` のサイクルのみが発生し、disposeは出ません。
-`probeKey.currentContext` が常に同一Elementを指すことで、配置先に関わらずStateへのアクセスが保証されます。
-P2のValueKeyが「同じ親の中でのKey照合」であるのに対し、
-GlobalKeyは「アプリ全体のレジストリでのKey照合」という対比がここで完成します。
+**確認できたこと：** GlobalKeyは照合スコープがアプリ全体のレジストリであるため、配置先の親が変わってもElementの同一性が維持されます。`deactivate → activate` のサイクルのみが発生し、disposeは出ません。
 
 ---
 
-## 設計上の注意点
+## 検証結果まとめ
+
+| シナリオ | 確認できたこと |
+| --- | --- |
+| P1: Keyなしで並べ替え | canUpdateはruntimeTypeのみで判定し、各位置のElementがそのまま再利用される。StateはlabelのKeyに追従しないため、countとlabelの対応が崩れる |
+| P2: ValueKeyありで並べ替え | canUpdateがKey一致で判定し、ElementがlabelのKeyに追従して移動する。countとlabelの対応が維持される |
+| P3: GlobalKeyで配置先切り替え | GlobalKeyはアプリ全体のレジストリ（BuildOwner._globalKeyRegistry）にElement参照を保持する。配置先の親が変わってもdeactivate → activateのみ発生し、disposeは出ない |
+
+---
+
+## 実装時に気をつけること
 
 ### Keyなし運用の許容範囲
 

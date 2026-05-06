@@ -21,7 +21,7 @@ class _Ch5P2NotificationBubblePageState
     debugPrint('[BUILD] Ch5 P2 page (#$pageBuildCount)');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch5 P2: Notification バブルアップ')),
+      appBar: AppBar(title: const Text('Ch5 P2: Notificationの伝播')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

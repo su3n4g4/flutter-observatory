@@ -2,7 +2,7 @@
 
 ▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-observatory/tree/main/flutter_observatory/lib/chapters/ch4)　▶ [検証画面](https://su3n4g4.github.io/flutter-observatory/)
 
-## 章の中心的な問い
+## この章で確かめること
 
 **setStateを呼んだとき、buildはいつ・誰によって実行されるのか？**
 
@@ -177,17 +177,17 @@ void _scheduleFrameProbe() {
 
 つまり、前提で説明した「登録と実行の分離」が実際に起きていることを、ログの出力順序だけで証明できます。
 
-### この章で確認すること
+### 検証で確認できること
 
 前提を踏まえると、この章の検証シナリオが何を確認しようとしているかが分かります。
 
-- **重複排除の確認：** setStateを同一イベント内で3回呼んだとき、buildは本当に1回にまとまるか（基本）
-- **遅延実行の確認：** 非同期完了後にsetStateを呼んだとき、同じ仕組みで処理されるか（派生）
-- **depth順ソートの確認：** 親と子がどちらもrebuildされるとき、親が先にbuildされるか（補足）
+- **重複排除の確認：** setStateを同一イベント内で3回呼んだとき、buildは本当に1回にまとまるか
+- **遅延実行の確認：** 非同期完了後にsetStateを呼んだとき、同じ仕組みで処理されるか
+- **depth順ソートの確認：** 親と子がどちらもrebuildされるとき、親が先にbuildされるか
 
 ---
 
-## 基本：setStateを3回呼んでもbuildは1回
+## setStateを3回呼んでもbuildは1回
 
 前提で「重複排除」の仕組みを見ました。ここではそれを実際のログで確認します。
 
@@ -282,7 +282,7 @@ void markNeedsBuild() {
 
 ---
 
-## 派生：非同期完了後のsetStateも同じメカニズム
+## 非同期完了後のsetStateも同じメカニズム
 
 基本ではタップハンドラ内（同期的）にsetStateを呼びました。では、Future完了後やタイマーコールバックなど、非同期のタイミングでsetStateを呼んだ場合はどうでしょうか。前提で見た「登録と実行の分離」が同期・非同期に依存しないことを確認します。
 
@@ -355,13 +355,13 @@ void buildScope(Element context, [VoidCallback? callback]) {
 
 ---
 
-### 基本・派生の解釈
+### この検証からわかること
 
 基本と派生を合わせて確認できたのは、前提で説明した構造がそのまま動いているということです。setStateはdirtyマークを付けてBuildOwnerに「このElementを次のフレームで再構築してほしい」と依頼するだけです。buildの実際の実行はBuildOwnerがフレーム描画のパイプラインの中で一括処理します。同期・非同期、1回・3回に関わらず、この構造は変わりません。
 
 ---
 
-## 補足：rebuildの順序はツリーの深さで決まる
+## rebuildの順序はツリーの深さで決まる
 
 基本でbuildが「フレームあたり1回」にまとまることを確認しました。では、親と子がどちらもrebuildされるとき、どちらが先にbuildされるのでしょうか。前提で触れた「depth順ソート」を確認します。
 
@@ -402,7 +402,17 @@ build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=Sta
 
 ---
 
-## 設計上の注意点
+## 検証結果まとめ
+
+| シナリオ | 確認できたこと |
+| --- | --- |
+| 基本: setStateを3回呼ぶ | setStateを同一イベントで3回呼んでもbuildは1回だけ実行される。markNeedsBuildの`if (dirty) return`による重複排除が機能している |
+| 派生: 非同期完了後のsetState | 呼び出しタイミング（同期・非同期）に関わらず、dirty登録 → 次フレームでBuildOwnerがrebuildという経路は変わらない。待機中フレームではdirtyリストが空なのでbuildは走らない |
+| 補足: rebuildの深さ順 | BuildOwnerはdirty Elementをツリーの深さ順（depth順）でrebuildする。親が先にbuildされ、子が後になる |
+
+---
+
+## 実装時に気をつけること
 
 - setStateを何回呼んでもbuildはフレームあたり1回にまとまるため、setState呼び出しの回数自体はパフォーマンス上の問題になりません。問題になるのはbuildが走るWidgetの範囲（スコープ）です。setStateを呼ぶStatefulWidgetがツリーの上位にあるほど、rebuildされる子孫の数が増えます。
 - 非同期完了後のsetStateでは、呼び出し前に`mounted`チェックが必要です。Futureの完了を待っている間にElementがツリーから外れている（Ch2で確認したdispose）可能性があります。前提で見たmarkNeedsBuildのライフサイクルガードがこの安全弁ですが、`mounted`チェックはそれ以前にアプリコード側で行うべき慣習です。

@@ -17,7 +17,7 @@ class _P3MoveParentPageState extends State<P3MoveParentPage> {
     const child = StateTracker('P');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('P3: Move Between Parents')),
+      appBar: AppBar(title: const Text('P3: 親の切り替え')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
