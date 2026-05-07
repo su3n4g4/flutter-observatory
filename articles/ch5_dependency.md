@@ -30,16 +30,15 @@ mountされた各Elementは、Widget本体のツリー（親子関係）とは�
 どちらもmountのタイミングで親から引き継いで構築されます。違いは「自分自身がそこに登場するかどうか」であり、これがそのまま2つの経路の性格を決めています。
 次のセクションでそれぞれの仕組みの詳細をみていきます。
 
-### InheritedWidget：祖先索引（mount時）と依存登録（build時）の二段構え
+### InheritedWidget
 
-InheritedWidgetは「スコープの公開」と「差分判定」を担います。この経路には**異なるタイミングで作られる2つの構造**が関わっています。
+InheritedWidgetは「スコープの公開」と「差分判定」を担います。mount時とbuild時の2つのタイミングで、それぞれ異なる構造を構築します。
 
-**段階1：祖先の索引化（mount時）**
+#### mount時：祖先の索引化
 
-まずは、Elementがmountされる際に、任意のElementが祖先のInheritedWidgetを型名で引けるように準備をします。
-下記に記載のソースはこのようにマップを作成しています。
+Elementがmountされる際に、任意のElementが祖先のInheritedWidgetを型名で引けるよう、下記の流れでマップを作成します。
 - 親の_inheritedWidgetsマップ（`Type` → `InheritedElement`）をコピーする
-- `InheritedElement`のみ：コピーしたマップに自分自身を追加する
+- `InheritedElement`の場合のみ、コピーしたマップに自分自身を追加する
 - 更新済みのマップを子に渡す
 
 ```dart
@@ -60,12 +59,11 @@ void _updateInheritance() {
 
 ここで構築されるのは「祖先を引くための索引」であって、「rebuild対象としての登録」ではありません。
 
-**段階2：依存登録（build時）**
+#### build時：依存登録
 
-次に、`build()`内で`of()`が呼ばれた瞬間に、呼び出し元のElementを「InheritedWidgetが更新されたらrebuildすべき対象」として登録します。
-下記に記載のソースはこのように依存登録を行っています。
+`build()`内で`of()`が呼ばれた瞬間に、呼び出し元のElementを「InheritedWidgetが更新されたらrebuildすべき対象」として登録します。
 
-- 段階1で作成したマップから祖先のInheritedElementを取得する
+- mount時に作成したマップから祖先のInheritedElementを取得する
 - 呼び出し元のElement（`this`）を祖先の`_dependents`（InheritedElementが保持する通知先リスト）に追加する
 
 ```dart
@@ -73,7 +71,7 @@ void _updateInheritance() {
 @override
 T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
   assert(_debugCheckStateIsActiveForAncestorLookup());
-  final InheritedElement? ancestor = _inheritedElements?[T];  // ← 段階1の索引を使う
+  final InheritedElement? ancestor = _inheritedElements?[T];  // ← mount時の索引を使う
   if (ancestor != null) {
     return dependOnInheritedElement(ancestor, aspect: aspect) as T;
   }
@@ -86,20 +84,20 @@ T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect
 InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect }) {
   _dependencies ??= HashSet<InheritedElement>();
   _dependencies!.add(ancestor);
-  ancestor.updateDependencies(this, aspect);  // ← ここで_dependentsに登録（段階2）
+  ancestor.updateDependencies(this, aspect);  // ← ここで_dependentsに登録
   return ancestor.widget as InheritedWidget;
 }
 ```
 
 ここで重要なのは登録のタイミングです。
-
-- 登録が起きるのは`build()`内で`dependOn`が呼ばれた時点のみ（Widget定義時でもmount時でもない）
-- 同じElementでも、`of()`を呼ばなかったフレームでは依存を失う
+登録が起きるのは`build()`内で`dependOn`が呼ばれた時点のみで、Widget定義時でもmount時でもありません。
+また、同じElementでも、`of()`を呼ばなかったフレームでは依存を失います。
 
 **どのElementが通知を受け取るかはWidgetの静的な構造からは決まらず、build()の実行履歴によって決まります。**
 
-更新時の通知経路は次のとおりです。
-値が変化したかどうかは`updateShouldNotify`メソッドで判定され、`true`を返した場合のみ`notifyClients`が呼ばれます。
+#### 更新時：notifyClients による通知
+
+値が変化したかどうかは、アプリ側で実装する`updateShouldNotify`メソッドで判定され、`true`を返した場合のみ`notifyClients`が呼ばれます。
 
 ```dart
 @override
@@ -121,29 +119,31 @@ void notifyClients(InheritedWidget oldWidget) {
 }
 ```
 
-`_dependents.keys`を走査して、登録済みElementにのみ`markNeedsBuild`を流します。ここに載っていないElementには通知が届きません。
+`notifyClients`では`_dependents.keys`を走査して、登録済みElementにのみ`markNeedsBuild`を通知します。逆に言えば、`_dependents.keys`に含まれないElementには通知が届きません。
 
-### Notification：構造解決のみ（mount時）、依存登録なし
+### Notification
 
-一方、Notification経路にはInheritedWidgetでいう段階2に相当する「rebuild対象としての依存登録」がありません。代わりにmount時に作られるのが`_notificationTree`です。
+NotificationにはInheritedWidgetとは異なり「rebuild対象としての依存登録」がありません。
 
-**mount時：Listenerだけが連結された別系統のリンク**
+#### mount時：連結リストの構築
 
-すべてのElementは`attachNotificationTree()`というフックを持ち、`mount`のタイミングで呼ばれます。通常のElementは親の`_notificationTree`参照をそのまま受け継ぐだけですが、`NotifiableElementMixin`をミックスインしたElement（`NotificationListener`が使う）は、自分自身を含む新しいノードを作って親から引き継いだ伝播経路の先頭に追加します。
+すべてのElementは`mount`のタイミングで`attachNotificationTree()`を呼び出します。通常のElementは親の参照をそのまま受け継ぐだけですが、`NotifiableElementMixin`（`NotificationListener`が使う）は自分自身を先頭に追加した新しいノードを作ります。
 
 ```dart
-// NotifiableElementMixin
 void attachNotificationTree() {
   _notificationTree = _NotificationNode(_parent?._notificationTree, this);
-  // ↑ 自分を _NotificationNode に包み、親の _notificationTree を後ろに連結
 }
 ```
 
-連結リストのprependに相当する操作で、結果としてツリー構築と並行して**Listenerだけが連結された連結リスト**が出来上がります。子のElementは親の`_notificationTree`を参照として受け継ぐため、任意の子Elementから`dispatch`を呼べば、その時点で保持している`_notificationTree`を通じて祖先のListenerへ到達できます。
+これにより任意の子Elementから`dispatch`を呼ぶと、`_notificationTree`チェーンを通じて祖先のListenerへ順に到達できます。
 
-**dispatch時：3層に分かれた処理**
+#### dispatch時：3層に分かれた処理
 
-`Notification.dispatch(context)`は、すでに出来上がっている`_notificationTree`チェーンを辿って近い順にListenerに通知します。実装は3つのクラスに責務が分かれています。
+`dispatch`の処理は3つのクラスに責務が分かれています。
+
+- **`Notification`**：データの運搬役に徹し、`context.dispatchNotification`を呼ぶだけ
+- **`NotifiableElementMixin`**：mount時に構築済みの`_notificationTree`チェーンの走査を開始する
+- **`_NotificationNode`**：各ノードで`onNotification`を呼び出し、`true`なら伝播停止、`false`なら上位ノードへ続ける（型が一致しないListenerも`false`を返してスルーされる）
 
 ```dart
 // Notification.dispatch
@@ -165,8 +165,6 @@ void dispatchNotification(Notification notification) {
   parent?.dispatchNotification(notification);  // false → 上位ノードへ続く
 }
 ```
-
-`Notification`自体はデータの運搬役に徹し、伝播ロジックを持ちません。`context.dispatchNotification`がmount時に構築済みの`_notificationTree`を起点に走査を始め、各ノードの`current`（`_NotificationElement`）が`onNotification`を返します。戻り値が`true`なら伝播停止、`false`なら`parent`（連結リストの次ノード）へ進みます。型フィルタリング（`notification is T`）は`_NotificationElement.onNotification`内で行われるため、型が一致しないListenerは`false`を返してスルーされます。
 
 ここで重要なのは、**通知の宛先がツリー構造（mount時に決まる静的な配置）から完全に決まっていて、build()内で何を呼ぼうと宛先は変わらない**ということです。InheritedWidgetが`of()`を呼んだElementを動的に`_dependents`へ登録するのとは対照的に、Notificationは「誰が通知を受け取るか」を構造そのもので固定しています。
 
