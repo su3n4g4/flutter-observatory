@@ -1,6 +1,6 @@
 # flutter-observatory
 
-FlutterのElementツリーが持つ5つの責務を、動くコードで観測・確認するリポジトリです。
+FlutterのElementツリーが持つ5つの責務を、検証画面を動かしながら確認するためのリポジトリです。
 
 ## 検証ページ
 
@@ -39,4 +39,4 @@ Ch5: 依存             ─ 変化はどのElementまで伝播するか
 | Ch4 | [flutter_observatory/lib/chapters/ch4/](flutter_observatory/lib/chapters/ch4/) |
 | Ch5 | [flutter_observatory/lib/chapters/ch5/](flutter_observatory/lib/chapters/ch5/) |
 
-観測に使うコアウィジェットは [flutter_observatory/lib/widgets/state_tracker.dart](flutter_observatory/lib/widgets/state_tracker.dart) です。
+検証に使うコアウィジェットは [flutter_observatory/lib/widgets/state_tracker.dart](flutter_observatory/lib/widgets/state_tracker.dart) です。
