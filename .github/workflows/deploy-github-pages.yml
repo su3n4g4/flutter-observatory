@@ -1,7 +1,7 @@
 # .github/workflows/deploy-github-pages.yml
 #
 # Flutter Web → GitHub Pages 自動デプロイ
-# 公開先: https://su3n4g4.github.io/flutter-observatory/
+# 公開先: https://su3n4g4.github.io/flutter-element-lab/
 
 name: Deploy to GitHub Pages
 
@@ -38,16 +38,16 @@ jobs:
       - run: flutter --version
 
       - run: flutter pub get
-        working-directory: flutter_observatory
+        working-directory: flutter_element_lab
 
-      - run: flutter build web --release --base-href /flutter-observatory/
-        working-directory: flutter_observatory
+      - run: flutter build web --release --base-href /flutter-element-lab/
+        working-directory: flutter_element_lab
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: flutter_observatory/build/web
+          path: flutter_element_lab/build/web
 
       - id: deployment
         uses: actions/deploy-pages@v4

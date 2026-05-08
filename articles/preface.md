@@ -27,7 +27,7 @@ Ch1とCh2が土台となり、この2章が腑に落ちると、Ch3〜Ch5が「�
 
 検証に使うコードはすべて以下のリポジトリにあります。
 
-▶ [flutter-observatory](https://github.com/su3n4g4/flutter-observatory)
+▶ [flutter-element-lab](https://github.com/su3n4g4/flutter-element-lab)
 
 コードの詳細は記事では省略し、各章に該当ファイルへのリンクを置きます。
 
@@ -36,7 +36,7 @@ Ch1とCh2が土台となり、この2章が腑に落ちると、Ch3〜Ch5が「�
 下記より検証コードをブラウザで動かすことができます。
 ログはChromeのDevToolにてconsoleに出力されます。
 手元で動かしながら読むと、ログの意味がより実感を持って確認できます。
-▶ [https://su3n4g4.github.io/flutter-observatory/](https://su3n4g4.github.io/flutter-observatory/)
+▶ [https://su3n4g4.github.io/flutter-element-lab/](https://su3n4g4.github.io/flutter-element-lab/)
 
 次のセクションから前提知識の説明に入ります。
 

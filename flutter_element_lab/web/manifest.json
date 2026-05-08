@@ -1,6 +1,6 @@
 {
-    "name": "flutter_observatory",
-    "short_name": "flutter_observatory",
+    "name": "flutter_element_lab",
+    "short_name": "flutter_element_lab",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

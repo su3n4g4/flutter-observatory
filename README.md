@@ -1,4 +1,4 @@
-# flutter-observatory
+# flutter-element-lab
 
 FlutterのElementツリーが持つ5つの責務を、検証画面を動かしながら確認するためのリポジトリです。
 
@@ -6,7 +6,7 @@ FlutterのElementツリーが持つ5つの責務を、検証画面を動かし�
 
 ブラウザで動作を確認できます。
 
-▶ https://su3n4g4.github.io/flutter-observatory/
+▶ https://su3n4g4.github.io/flutter-element-lab/
 
 ## 構成
 
@@ -33,10 +33,10 @@ Ch5: 依存             ─ 変化はどのElementまで伝播するか
 
 | 章 | ディレクトリ |
 |----|--------------|
-| Ch1 | [flutter_observatory/lib/chapters/ch1/](flutter_observatory/lib/chapters/ch1/) |
-| Ch2 | [flutter_observatory/lib/chapters/ch2/](flutter_observatory/lib/chapters/ch2/) |
-| Ch3 | [flutter_observatory/lib/chapters/ch3/](flutter_observatory/lib/chapters/ch3/) |
-| Ch4 | [flutter_observatory/lib/chapters/ch4/](flutter_observatory/lib/chapters/ch4/) |
-| Ch5 | [flutter_observatory/lib/chapters/ch5/](flutter_observatory/lib/chapters/ch5/) |
+| Ch1 | [flutter_element_lab/lib/chapters/ch1/](flutter_element_lab/lib/chapters/ch1/) |
+| Ch2 | [flutter_element_lab/lib/chapters/ch2/](flutter_element_lab/lib/chapters/ch2/) |
+| Ch3 | [flutter_element_lab/lib/chapters/ch3/](flutter_element_lab/lib/chapters/ch3/) |
+| Ch4 | [flutter_element_lab/lib/chapters/ch4/](flutter_element_lab/lib/chapters/ch4/) |
+| Ch5 | [flutter_element_lab/lib/chapters/ch5/](flutter_element_lab/lib/chapters/ch5/) |
 
-検証に使うコアウィジェットは [flutter_observatory/lib/widgets/state_tracker.dart](flutter_observatory/lib/widgets/state_tracker.dart) です。
+検証に使うコアウィジェットは [flutter_element_lab/lib/widgets/state_tracker.dart](flutter_element_lab/lib/widgets/state_tracker.dart) です。

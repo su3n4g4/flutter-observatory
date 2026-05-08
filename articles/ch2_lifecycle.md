@@ -1,6 +1,6 @@
 # Ch2: Stateのライフサイクル管理
 
-▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-observatory/tree/main/flutter_observatory/lib/chapters/ch2)　▶ [検証画面](https://su3n4g4.github.io/flutter-observatory/)
+▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-element-lab/tree/main/flutter_element_lab/lib/chapters/ch2)　▶ [検証画面](https://su3n4g4.github.io/flutter-element-lab/)
 
 ## この章で確かめること
 
