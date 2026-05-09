@@ -87,17 +87,20 @@ PushedPageの State と、その子の StateTracker('PUSHED-PAGE-CHILD') の Sta
 「Navigator.pop（戻る）」ボタンを押します。PushedPageが閉じ、前画面に戻ります。
 
 ```
+PushedPage: deactivate
 deactivate: PUSHED-PAGE-CHILD  state=295841073
-PushedPage: dispose
 dispose: PUSHED-PAGE-CHILD  state=295841073
+PushedPage: dispose
 ```
 
 PushedPageのStateとStateTracker('PUSHED-PAGE-CHILD')のState、両方にdisposeが呼ばれました。popによってRoute配下のElementツリーがまるごと破棄され、そこに含まれる全てのStateが連鎖的にdisposeされています。
 
+deactivateの順序に注目してください。親（PushedPage）のdeactivateが先に呼ばれ、その後に子（PUSHED-PAGE-CHILD）のdeactivateが呼ばれています。これはFlutterが親から子へ再帰的にdeactivateを伝播させるためです。一方disposeは逆で、子（PUSHED-PAGE-CHILD）が先にdisposeされ、その後に親（PushedPage）がdisposeされます。`_InactiveElements._unmount`が「子を全てunmountしてから自身をunmount」する深さ優先の末端から先という処理をするためです。
+
 | 操作 | PushedPageのState | StateTracker('PUSHED-PAGE-CHILD') |
 | --- | --- | --- |
 | ①push | initState | initState（state=295841073） |
-| ②pop | dispose | deactivate → dispose（state=295841073） |
+| ②pop | deactivate → dispose | deactivate → dispose（state=295841073） |
 
 **③ 再度push**
 

@@ -53,6 +53,12 @@ class _PushedPageState extends State<_PushedPage> {
   }
 
   @override
+  void deactivate() {
+    debugPrint('PushedPage: deactivate');
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     debugPrint('PushedPage: dispose');
     super.dispose();
