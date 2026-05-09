@@ -22,7 +22,7 @@ Ch5: 依存             ─ 変化はどのElementまで伝播するか
 
 | 章 | タイトル | ファイル |
 |----|----------|----------|
-| 序文 | FlutterのElementツリーを理解する | [articles/preface.md](articles/preface.md) |
+| 序文 | FlutterのElementツリーを理解する | [articles/ch0_preface.md](articles/ch0_preface.md) |
 | Ch1 | Elementツリーの位置管理 | [articles/ch1_position.md](articles/ch1_position.md) |
 | Ch2 | Stateのライフサイクル管理 | [articles/ch2_lifecycle.md](articles/ch2_lifecycle.md) |
 | Ch3 | 同一性管理（Key） | [articles/ch3_identity.md](articles/ch3_identity.md) |
