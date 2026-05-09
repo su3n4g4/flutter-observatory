@@ -1,4 +1,4 @@
-# flutter_observatory
+# flutter_element_lab
 
 A new Flutter project.
 
