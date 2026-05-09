@@ -196,4 +196,5 @@ build: GLOBAL-KEYED  state=573819240  depth=8  widgetType=StateTracker  element=
 
 - 条件分岐や画面遷移でWidgetをツリーから外すと、そのStateは破棄されます。表示を戻しても以前のStateは復元されません。StreamのSubscription、AnimationController、TextEditingControllerなど、Stateが保持するリソースはdisposeで確実に解放する必要があります。
 - Navigatorのpopは、Route配下の全Stateを連鎖的にdisposeします。push元の画面は残りますが、pop先の画面は完全に破棄されます。画面をまたいでStateを保持したい場合は、State以外の場所（Provider / Riverpod / グローバルな状態管理）に置く設計が必要になります。
+- 非同期処理のコールバック内では、awaitの後にStateがすでにdisposeされている可能性があります。`if (!mounted) return;` でチェックしてからsetStateを呼ぶことで、破棄済みのStateへのアクセスを防げます。このガードがなぜ必要かの仕組み（`markNeedsBuild`のライフサイクルチェック）はCh4で扱います。
 - GlobalKeyを使うとStateをdispose無しに移動できますが、これは例外的な手段です。意図せずStateが生き残る事故の原因にもなります。
