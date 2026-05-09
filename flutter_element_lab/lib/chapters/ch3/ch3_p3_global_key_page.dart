@@ -10,7 +10,7 @@ class Ch3P3GlobalKeyPage extends StatefulWidget {
 }
 
 class _Ch3P3GlobalKeyPageState extends State<Ch3P3GlobalKeyPage> {
-  bool placeInTopSlot = true;
+  bool putInTopSlot = true;
 
   final GlobalKey probeKey = GlobalKey(debugLabel: 'ch3-global-probe');
 
@@ -20,15 +20,15 @@ class _Ch3P3GlobalKeyPageState extends State<Ch3P3GlobalKeyPage> {
     final keyedTracker = StateTracker('GLOBAL-KEYED', key: probeKey);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch3 P3: GlobalKey で配置先を切り替える')),
+      appBar: AppBar(title: const Text('Ch3 P3: GlobalKey で移動')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             FilledButton(
-              onPressed: () => setState(() => placeInTopSlot = !placeInTopSlot),
-              child: const Text('配置先を切り替える'),
+              onPressed: () => setState(() => putInTopSlot = !putInTopSlot),
+              child: const Text('上下スロットを切り替える'),
             ),
             const SizedBox(height: 12),
             Text(
@@ -38,12 +38,12 @@ class _Ch3P3GlobalKeyPageState extends State<Ch3P3GlobalKeyPage> {
             const Divider(height: 24),
             _Slot(
               title: 'Top Slot',
-              child: placeInTopSlot ? keyedTracker : const SizedBox.shrink(),
+              child: putInTopSlot ? keyedTracker : const SizedBox.shrink(),
             ),
             const SizedBox(height: 12),
             _Slot(
               title: 'Bottom Slot',
-              child: placeInTopSlot ? const SizedBox.shrink() : keyedTracker,
+              child: putInTopSlot ? const SizedBox.shrink() : keyedTracker,
             ),
           ],
         ),

@@ -49,11 +49,11 @@ Ch1 P1 と同じ操作です。ここでは結果だけ整理します。
 
 Ch1では「Elementは位置に紐づく」という位置管理の観点から確認しました。この章では同一性管理の観点から見ます。Keyがない場合、`canUpdate` はruntimeTypeのみで判定するため、Elementの同一性は位置で決まります。これがP2（ValueKey）との対比基準となります。
 
-| 操作後の表示位置 | label | count（State） | state hashCode |
-| --- | --- | --- | --- |
-| 1行目 | C（移動） | 1（元の位置のまま） | 997303568（変化なし） |
-| 2行目 | B（不変） | 1 | 545823583 |
-| 3行目 | A（移動） | 1（元の位置のまま） | 1040413516（変化なし） |
+| 操作後の表示位置 | label | state hashCode |
+| --- | --- | --- |
+| 1行目 | C（移動） | 997303568（変化なし） |
+| 2行目 | B（不変） | 545823583 |
+| 3行目 | A（移動） | 1040413516（変化なし） |
 
 **確認できたこと：** Keyがない場合、Stateは位置に留まりlabelに追従しません。
 
@@ -89,14 +89,14 @@ build: A  state=110179758  depth=153  widgetType=StateTracker  element=StatefulE
 
 各位置に何が起きたかを整理します。
 
-| 操作後の表示位置 | label | count（State） | state hashCode |
-| --- | --- | --- | --- |
-| 1行目 | C | 1（Cのまま） | 277223098（Cと一緒に移動） |
-| 2行目 | B | 1 | 520698145 |
-| 3行目 | A | 1（Aのまま） | 110179758（Aと一緒に移動） |
+| 操作後の表示位置 | label | state hashCode |
+| --- | --- | --- |
+| 1行目 | C | 277223098（Cと一緒に移動） |
+| 2行目 | B | 520698145 |
+| 3行目 | A | 110179758（Aと一緒に移動） |
 
 **確認できたこと：** ValueKeyがある場合、`canUpdate` は親のchildren内でKey一致するElementを探して再利用します。
-StateはlabelのKeyに紐づいているため、表示位置が変わってもlabelとcountの対応が維持されます。
+StateはlabelのKeyに紐づいているため、表示位置が変わっても state hashCode がlabelと一緒に移動します。
 P1との対比でKeyの有無が何を変えるかが明確になります。
 
 ---
@@ -164,8 +164,8 @@ Ch2では「disposeが出ない」という事実をライフサイクルの観�
 
 | シナリオ | 確認できたこと |
 | --- | --- |
-| P1: Keyなしで並べ替え | canUpdateはruntimeTypeのみで判定し、各位置のElementがそのまま再利用される。StateはlabelのKeyに追従しないため、countとlabelの対応が崩れる |
-| P2: ValueKeyありで並べ替え | canUpdateがKey一致で判定し、ElementがlabelのKeyに追従して移動する。countとlabelの対応が維持される |
+| P1: Keyなしで並べ替え | canUpdateはruntimeTypeのみで判定し、各位置のElementがそのまま再利用される。StateはlabelのKeyに追従せず、state hashCodeが位置に留まる |
+| P2: ValueKeyありで並べ替え | canUpdateがKey一致で判定し、ElementがlabelのKeyに追従して移動する。state hashCodeがlabelと一緒に移動し、同一性が維持される |
 | P3: GlobalKeyで配置先切り替え | GlobalKeyはアプリ全体のレジストリ（BuildOwner._globalKeyRegistry）にElement参照を保持する。配置先の親が変わってもdeactivate → activateのみ発生し、disposeは出ない |
 
 ---
