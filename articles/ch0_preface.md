@@ -177,7 +177,7 @@ Elementが生成されると、`inflateWidget`は続けて`element.mount(parent,
 | `mount` | `element.mount(parent, slot)` | ここでElementがツリーに接続される |
 | `_firstBuild` | `initState` → `build` | WidgetのbuildがはじめてWidgetを返す |
 
-`inflateWidget`の中で「定義を渡す → オブジェクトを作る → ツリーに接続する」という3段階が一気に実行されます。`initState`の中で`of(context)`のような祖先への参照が使えない理由も、このmountのタイミングから来ています。詳細はCh5で扱います。
+`inflateWidget`の中で「定義を渡す → オブジェクトを作る → ツリーに接続する」という3段階が一気に実行されます。`initState`は1回しか呼ばれないため、後から InheritedWidget が変化しても rebuild を起こせません。そのため依存登録は`didChangeDependencies`で行うのが慣例です。詳細はCh5で扱います。
 
 ---
 
