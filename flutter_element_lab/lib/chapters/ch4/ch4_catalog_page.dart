@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/nav_button.dart';
 import 'ch4_p1_rebuild_scheduling_page.dart';
 
 class Ch4CatalogPage extends StatelessWidget {
@@ -7,23 +8,6 @@ class Ch4CatalogPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget navButton(String title, Widget page) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: FilledButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => page),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Text(title),
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(title: const Text('Element Tree Lab - Ch4')),
       body: Padding(
@@ -33,7 +17,7 @@ class Ch4CatalogPage extends StatelessWidget {
           children: [
             const Text('目的：再構築スケジューリングを観測し、dirty 登録と frame 単位の rebuild を確認する。'),
             const SizedBox(height: 16),
-            navButton('P1: setState と再構築スケジューリング', const Ch4P1RebuildSchedulingPage()),
+            const NavButton(title: 'P1: setState と再構築スケジューリング', page: Ch4P1RebuildSchedulingPage()),
           ],
         ),
       ),

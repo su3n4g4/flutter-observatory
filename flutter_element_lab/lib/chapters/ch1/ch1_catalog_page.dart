@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/nav_button.dart';
 import 'p1_reorder_no_key_page.dart';
 import 'p1_reorder_with_key_page.dart';
 import 'p2_conditional_page.dart';
@@ -10,23 +11,6 @@ class Ch1CatalogPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget navButton(String title, Widget page) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: FilledButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => page),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Text(title),
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(title: const Text('Element Tree Lab - Ch1')),
       body: Padding(
@@ -38,10 +22,10 @@ class Ch1CatalogPage extends StatelessWidget {
               '目的：Elementツリーが管理する「親子・位置(slot/index)・生死」を観測で確定する。',
             ),
             const SizedBox(height: 16),
-            navButton('P1: 並べ替え（Keyなし）', const P1ReorderNoKeyPage()),
-            navButton('P1: 並べ替え（Keyあり）', const P1ReorderWithKeyPage()),
-            navButton('P2: 条件付き挿入・削除', const P2ConditionalPage()),
-            navButton('P3: 親の切り替え', const P3MoveParentPage()),
+            const NavButton(title: 'P1: 並べ替え（Keyなし）', page: P1ReorderNoKeyPage()),
+            const NavButton(title: 'P1: 並べ替え（Keyあり）', page: P1ReorderWithKeyPage()),
+            const NavButton(title: 'P2: 条件付き挿入・削除', page: P2ConditionalPage()),
+            const NavButton(title: 'P3: 親の切り替え', page: P3MoveParentPage()),
           ],
         ),
       ),

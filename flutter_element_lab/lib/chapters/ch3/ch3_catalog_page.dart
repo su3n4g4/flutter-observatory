@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/nav_button.dart';
 import 'ch3_p1_no_key_page.dart';
 import 'ch3_p2_value_key_page.dart';
 import 'ch3_p3_global_key_page.dart';
@@ -9,23 +10,6 @@ class Ch3CatalogPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget navButton(String title, Widget page) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: FilledButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => page),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Text(title),
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(title: const Text('Element Tree Lab - Ch3')),
       body: Padding(
@@ -35,9 +19,9 @@ class Ch3CatalogPage extends StatelessWidget {
           children: [
             const Text('目的：Element の同一性管理を Key 中心に観測する。'),
             const SizedBox(height: 16),
-            navButton('P1: 並べ替え（Keyなし）', const Ch3P1NoKeyPage()),
-            navButton('P2: 並べ替え（ValueKey）', const Ch3P2ValueKeyPage()),
-            navButton('P3: GlobalKey で配置先を切り替える', const Ch3P3GlobalKeyPage()),
+            const NavButton(title: 'P1: 並べ替え（Keyなし）', page: Ch3P1NoKeyPage()),
+            const NavButton(title: 'P2: 並べ替え（ValueKey）', page: Ch3P2ValueKeyPage()),
+            const NavButton(title: 'P3: GlobalKey で配置先を切り替える', page: Ch3P3GlobalKeyPage()),
           ],
         ),
       ),

@@ -5,29 +5,13 @@ import 'chapters/ch2/ch2_catalog_page.dart';
 import 'chapters/ch3/ch3_catalog_page.dart';
 import 'chapters/ch4/ch4_catalog_page.dart';
 import 'chapters/ch5/ch5_catalog_page.dart';
+import 'widgets/nav_button.dart';
 
 class RootCatalogPage extends StatelessWidget {
   const RootCatalogPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Widget navButton(String title, Widget page) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: FilledButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => page),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Text(title),
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(title: const Text('Element Tree Lab')),
       body: SingleChildScrollView(
@@ -37,11 +21,11 @@ class RootCatalogPage extends StatelessWidget {
           children: [
             const Text('章を選択してください。'),
             const SizedBox(height: 16),
-            navButton('Chapter 1: Element Tree', const Ch1CatalogPage()),
-            navButton('Chapter 2: Lifecycle', const Ch2CatalogPage()),
-            navButton('Chapter 3: Identity Management', const Ch3CatalogPage()),
-            navButton('Chapter 4: Rebuild Scheduling', const Ch4CatalogPage()),
-            navButton('Chapter 5: Dependency & Notification', const Ch5CatalogPage()),
+            const NavButton(title: 'Chapter 1: Element Tree', page: Ch1CatalogPage()),
+            const NavButton(title: 'Chapter 2: Lifecycle', page: Ch2CatalogPage()),
+            const NavButton(title: 'Chapter 3: Identity Management', page: Ch3CatalogPage()),
+            const NavButton(title: 'Chapter 4: Rebuild Scheduling', page: Ch4CatalogPage()),
+            const NavButton(title: 'Chapter 5: Dependency & Notification', page: Ch5CatalogPage()),
           ],
         ),
       ),
