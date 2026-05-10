@@ -12,12 +12,12 @@ class Ch3P3GlobalKeyPage extends StatefulWidget {
 class _Ch3P3GlobalKeyPageState extends State<Ch3P3GlobalKeyPage> {
   bool putInTopSlot = true;
 
-  final GlobalKey probeKey = GlobalKey(debugLabel: 'ch3-global-probe');
+  final GlobalKey _probeKey = GlobalKey(debugLabel: 'ch3-global-probe');
 
   @override
   Widget build(BuildContext context) {
-    final currentElement = probeKey.currentContext as Element?;
-    final keyedTracker = StateTracker('GLOBAL-KEYED', key: probeKey);
+    final currentElement = _probeKey.currentContext as Element?;
+    final keyedTracker = StateTracker('GLOBAL-KEYED', key: _probeKey);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Ch3 P3: GlobalKey で移動')),
