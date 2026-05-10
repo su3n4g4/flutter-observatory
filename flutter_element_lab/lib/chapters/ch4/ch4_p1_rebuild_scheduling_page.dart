@@ -90,7 +90,7 @@ class _Ch4P1RebuildSchedulingPageState extends State<Ch4P1RebuildSchedulingPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 StateTracker('child-A'),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 StateTracker('child-B'),
               ],
             ),
