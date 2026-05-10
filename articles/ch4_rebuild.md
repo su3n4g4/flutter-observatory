@@ -19,7 +19,7 @@ setStateを呼ぶとUIが更新されますが、setStateがbuildを直接呼ん
 ```
 時間 →
 │ フレーム1 │ フレーム2 │ フレーム3 │ フレーム4 │
-│  16.7ms  │  16.7ms  │  16.7ms │  16.7ms  │
+│  16.7ms   │  16.7ms   │  16.7ms   │  16.7ms  │
                                      ↑
                                     60fpsなら1フレーム≒16.7ms
 ```
@@ -99,27 +99,36 @@ WB->>WB: paint
 
 登録側（フレームの外）で起きたことが、VSync到着を挟んで実行側（フレームの中）で処理されます。この構造をログで確認するのが、この章の検証シナリオの目的となります。
 
-### ログの仕込み方：登録と実行の分離を確認する
+### 検証で確認すること
 
-ここまでで、setStateからbuildまでの構造が分かりました。
+前提を踏まえた上で、この章では下記を検証していきます。
 
-- setStateはフレームの**外**で呼ばれ、dirty登録だけ行います
-- buildはフレームの**中**で、BuildOwnerによって実行されます
-- 両者はVSync到着を挟んで時間的に分離されています
+- **重複排除の確認：** setStateを同一イベント内で3回呼んだとき、buildは本当に1回にまとまるか
+- **遅延実行の確認：** 非同期完了後にsetStateを呼んだとき、同じ仕組みで処理されるか
+- **depth順ソートの確認：** 親と子がどちらもrebuildされるとき、親が先にbuildされるか
 
-この構造をログで確認するには、「フレームの外」「フレームの中」「フレームの完了」にそれぞれログを仕込めばよいです。1フレームの処理順序の中で、どこに何を仕込んでいるかを示します。
+
+## ログの仕込み方：登録と実行の分離を確認する
+
+ログを仕込んで検証を行うには、次の3つを確認していきます。。
+
+- setStateを起点にElementがdirty登録されたこと
+- VSync到着後のフレームでbuild()が開始されたこと
+- build・layout・paintを含むフレームの描画処理が完了したこと
+
+実際に1フレームの処理順序の中で、どこに何を仕込んでいるかを下記に示します。
 
 ```
 1フレームの処理順序と各ログの位置：
 
-[ACTION]                             ← フレームの外（イベントハンドラ内）
+_runMultipleSetState()               ← [ACTION]（setStateを呼び出すイベントハンドラのdebugPrint）
     ～ VSync到着 ～
 handleDrawFrame()
   ├→ drawFrame()
   │    ├→ buildScope()               ← [BUILD] が出る（build()内のdebugPrint）
-  │    ├→ layout
-  │    └→ paint
-  └→ post frame callbacks           ← [FRAME] をここに仕込む
+  │    ├→ layout処理
+  │    └→ paint処理
+  └→ フレーム完了後コールバック      ← [FRAME] が出る（addPostFrameCallback内のdebugPrint）
 ```
 
 **[ACTION]：イベントハンドラ内のdebugPrint**
@@ -132,7 +141,7 @@ void _runMultipleSetState() {
 }
 ```
 
-setStateを呼ぶ直前に出ます。フレームの外の出来事です。
+setStateを呼ぶ直前にログが表示されます。フレームの外の出来事です。
 
 **[BUILD]：build()メソッド内のdebugPrint**
 
@@ -144,7 +153,7 @@ Widget build(BuildContext context) {
 }
 ```
 
-BuildOwnerがbuildScope内でrebuildを実行すると、build()が呼ばれてログが出ます。フレームの中の出来事です。
+BuildOwnerがbuildScope内でrebuildを実行すると、build()が呼ばれてログが表示されます。フレームの中の出来事です。
 
 **[FRAME]：addPostFrameCallback**
 
@@ -161,35 +170,13 @@ void _scheduleFrameProbe() {
 
 `drawFrame()`の完了後に呼ばれます。フレーム完了の打刻です。`addPostFrameCallback`は1回限りのコールバックなので、毎フレーム監視するにはコールバック内で自分自身を再登録します。
 
-### なぜこの3つで検証が成立するか
-
-```
-[ACTION] ...                        ← setStateが呼ばれた（フレームの外）
-[BUILD] ...                          ← buildが実行された（フレームの中）
-[FRAME] drawFrame completed: #N      ← フレーム完了
-```
-
-この出力順序が得られれば、以下の3つが同時に確認できます。
-
-1. `[ACTION]`が`[BUILD]`の前 → setStateはbuildより前に呼ばれている（フレームの外）
-2. `[BUILD]`が`[FRAME]`の前 → buildはフレーム完了前に実行されている（フレームの中）
-3. `[BUILD]`の出現回数 → setStateを何回呼んでもbuildは1回にまとまっている
-
-つまり、前提で説明した「登録と実行の分離」が実際に起きていることを、ログの出力順序だけで証明できます。
-
-### 検証で確認できること
-
-前提を踏まえると、この章の検証シナリオが何を確認しようとしているかが分かります。
-
-- **重複排除の確認：** setStateを同一イベント内で3回呼んだとき、buildは本当に1回にまとまるか
-- **遅延実行の確認：** 非同期完了後にsetStateを呼んだとき、同じ仕組みで処理されるか
-- **depth順ソートの確認：** 親と子がどちらもrebuildされるとき、親が先にbuildされるか
+この3つの出力順序（`[ACTION]` → `[BUILD]` → `[FRAME]`）から、登録と実行の分離が実際に起きていることをログで証明できます。
 
 ---
 
-## setStateを3回呼んでもbuildは1回
+## 重複排除の確認
 
-前提で「重複排除」の仕組みを見ました。ここではそれを実際のログで確認します。
+まずは重複排除の検証から行います。
 
 ### 同一イベントでsetStateを3回呼ぶ
 
@@ -206,7 +193,7 @@ build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=Sta
 [FRAME] drawFrame completed: #N
 ```
 
-`[BUILD]`の後に`[FRAME]`が出ています。buildはフレーム完了前に実行されています。前提で見た`drawFrame() → buildScope() → rebuild()`の流れがここに対応します。
+`[BUILD]`の後に`[FRAME]`が出ています。buildはフレーム完了前に実行されています。
 
 **② 「同一イベントでsetState を3回呼ぶ」ボタン押下**
 
@@ -257,12 +244,12 @@ build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=Sta
 
 ### 確認できたこと
 
-setStateはbuildを直接呼びません。setStateがやるのは`Element.markNeedsBuild`を通じてdirtyフラグを立て、`BuildOwner.scheduleBuildFor`に登録することです。実際のbuildは`WidgetsBinding.drawFrame`の中で`BuildOwner.buildScope`が一括実行します。
+setStateはbuildを直接呼びません。setStateが行うのは`Element.markNeedsBuild`を通じてdirtyフラグを立て、`BuildOwner.scheduleBuildFor`に登録することです。実際のbuildは`WidgetsBinding.drawFrame`の中で`BuildOwner.buildScope`が一括実行します。
 
-重複排除の仕組みはmarkNeedsBuildの実装に見えます。
+重複排除の仕組みはmarkNeedsBuildの実装から確認ができます。
 
 ```dart
-// Element.markNeedsBuild()（本番処理のみ抽出）
+// Element.markNeedsBuild()（assert・デバッグコードを省略）
 void markNeedsBuild() {
   // active以外（inactive等）なら何もしない
   if (_lifecycleState != _ElementLifecycle.active) {
@@ -282,9 +269,10 @@ void markNeedsBuild() {
 
 ---
 
-## 非同期完了後のsetStateも同じメカニズム
+## 遅延実行の確認
 
-基本ではタップハンドラ内（同期的）にsetStateを呼びました。では、Future完了後やタイマーコールバックなど、非同期のタイミングでsetStateを呼んだ場合はどうでしょうか。前提で見た「登録と実行の分離」が同期・非同期に依存しないことを確認します。
+重複排除の確認ではタップハンドラ内（同期的）でsetStateを呼びました。では、Future完了後やタイマーコールバックなど、非同期のタイミングでsetStateを呼んだ場合はどうでしょうか。
+前提で見た「登録と実行の分離」が同期・非同期に依存しないことを確認します。
 
 ### 非同期完了後にsetStateを呼ぶ
 
@@ -325,7 +313,7 @@ async完了後はsetStateが呼ばれ、次のフレームでbuildが実行さ�
 待機中の約21フレームにわたって`[BUILD]`が出ないことは、dirty Elementがないフレームではbuildが走らないことを示しています。これはBuildOwnerの`buildScope()`が、dirtyリストが空の場合に早期リターンする設計によるものです。
 
 ```dart
-// BuildOwner.buildScope()（本番処理のみ抽出）
+// BuildOwner.buildScope()（assert・デバッグコードを省略）
 void buildScope(Element context, [VoidCallback? callback]) {
   final BuildScope buildScope = context.buildScope;
 
@@ -345,7 +333,7 @@ void buildScope(Element context, [VoidCallback? callback]) {
 
 前提の「全体の流れ」と照らし合わせます。
 
-| 前提の経路 | 実際のログ |
+| 実行処理 | 実際のログ |
 | --- | --- |
 | `setState(fn)` → `fn()` | `[ACTION] async completed -> setState` |
 | `markNeedsBuild()` → `scheduleBuildFor(this)` | （内部処理、ログなし） |
@@ -357,13 +345,13 @@ void buildScope(Element context, [VoidCallback? callback]) {
 
 ### この検証からわかること
 
-基本と派生を合わせて確認できたのは、前提で説明した構造がそのまま動いているということです。setStateはdirtyマークを付けてBuildOwnerに「このElementを次のフレームで再構築してほしい」と依頼するだけです。buildの実際の実行はBuildOwnerがフレーム描画のパイプラインの中で一括処理します。同期・非同期、1回・3回に関わらず、この構造は変わりません。
+重複排除と実行遅延の検証で確認できたのは、前提で説明した構造がそのまま動いているということです。setStateはdirtyマークを付けてBuildOwnerに「このElementを次のフレームで再構築してほしい」と依頼するだけです。buildの実際の実行はBuildOwnerがフレーム描画のパイプラインの中で一括処理します。同期・非同期、1回・3回に関わらず、この構造は変わりません。
 
 ---
 
-## rebuildの順序はツリーの深さで決まる
+## depth順ソートの確認
 
-基本でbuildが「フレームあたり1回」にまとまることを確認しました。では、親と子がどちらもrebuildされるとき、どちらが先にbuildされるのでしょうか。前提で触れた「depth順ソート」を確認します。
+重複排除の検証でbuildが「フレームあたり1回」にまとまることを確認しました。では、親と子がどちらもrebuildされるとき、どちらが先にbuildされるのでしょうか。
 
 ### 親→子のrebuild順序
 
@@ -406,9 +394,9 @@ build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=Sta
 
 | シナリオ | 確認できたこと |
 | --- | --- |
-| 基本: setStateを3回呼ぶ | setStateを同一イベントで3回呼んでもbuildは1回だけ実行される。markNeedsBuildの`if (dirty) return`による重複排除が機能している |
-| 派生: 非同期完了後のsetState | 呼び出しタイミング（同期・非同期）に関わらず、dirty登録 → 次フレームでBuildOwnerがrebuildという経路は変わらない。待機中フレームではdirtyリストが空なのでbuildは走らない |
-| 補足: rebuildの深さ順 | BuildOwnerはdirty Elementをツリーの深さ順（depth順）でrebuildする。親が先にbuildされ、子が後になる |
+| 重複排除 | setStateを同一イベントで3回呼んでもbuildは1回だけ実行される。markNeedsBuildの`if (dirty) return`による重複排除が機能している |
+| 実行遅延 | 呼び出しタイミング（同期・非同期）に関わらず、dirty登録 → 次フレームでBuildOwnerがrebuildという経路は変わらない。待機中フレームではdirtyリストが空なのでbuildは走らない |
+| depth順ソート| BuildOwnerはdirty Elementをツリーの深さ順（depth順）でrebuildする。親が先にbuildされ、子が後になる |
 
 ---
 
