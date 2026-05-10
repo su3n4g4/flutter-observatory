@@ -107,7 +107,7 @@ Elementがツリー上で子を管理するとき、その判断はすべて`Ele
 - **`Element.inflateWidget`**：WidgetからElementを新規生成し、ツリーに接続する。`State.initState`が呼ばれる
 - **`Element.deactivateChild`**：Elementをツリーから`inactive`状態にする。同フレーム内で再接続されなければ`State.dispose`が呼ばれてStateが破棄される
 - **`Element.update`**：既存のElementに新しいWidgetを渡す。変更前のWidgetを引数にStateへ変化を通知する`State.didUpdateWidget`が呼ばれる
-  - **`Widget.canUpdate`**：`Element.update`を呼ぶかを決める判定。（詳細は次節）
+  - **`Widget.canUpdate`**：`Element.update`を呼ぶかを決める判定。
 
 この組み合わせで4つに分岐します。
 
@@ -117,19 +117,6 @@ Elementがツリー上で子を管理するとき、その判断はすべて`Ele
 | null | non-null | 新規追加 | `Element.inflateWidget`（Elementを新規生成） |
 | non-null | null | 削除 | `Element.deactivateChild`（Elementを破棄） |
 | non-null | non-null | rebuild | `Widget.canUpdate`が true なら`Element.update`（既存Elementを再利用）、false なら`Element.deactivateChild`して`Element.inflateWidget`（作り直し） |
-
-### Widget.canUpdate の判定
-
-`Widget.canUpdate`は`Widget`が判断します。
-判断基準は**runtimeTypeとKeyの2つだけ**です。childrenの内容や他のプロパティは一切見ません。この単純なルールがCh1・Ch3の検証の根拠になります。
-
-```dart
-// packages/flutter/lib/src/widgets/framework.dart
-static bool canUpdate(Widget oldWidget, Widget newWidget) {
-  return oldWidget.runtimeType == newWidget.runtimeType
-      && oldWidget.key == newWidget.key;
-}
-```
 
 ---
 
@@ -199,7 +186,7 @@ Stateの各コールバックと呼び出し元を一覧にします。`State.se
 | `State.didUpdateWidget()` | `StatefulElement.update()` | `Widget.canUpdate`がtrueで既存Elementを再利用したとき |
 | `State.deactivate()` | `Element.deactivateChild()` | ツリーから外されたとき |
 | `State.dispose()` | `StatefulElement.unmount()` | フレーム末尾で再接続されなかったとき |
-| `State.setState()` | State自身が呼べる | 唯一Stateが能動的に起動できる操作（詳細はCh4） |
+| `State.setState()` | State自身が呼べる | 唯一Stateが能動的に起動できる操作 |
 
 ---
 
