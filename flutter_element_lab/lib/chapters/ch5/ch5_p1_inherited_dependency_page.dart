@@ -32,12 +32,12 @@ class Ch5P1InheritedDependencyPage extends StatelessWidget {
             const Divider(height: 24),
 
             // スコープ
-            _LayerLabel('スコープ', color: Color(0xFF7B1FA2)),
+            LayerLabel('スコープ', color: Color(0xFF7B1FA2)),
             _VisualDependencyScope(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _LayerLabel('利用側', color: Color(0xFF388E3C)),
+                  LayerLabel('利用側', color: Color(0xFF388E3C)),
                   _DependentWidget(),
                   _IndependentWidget(),
                 ],
@@ -197,36 +197,6 @@ class _IndependentWidgetState extends State<_IndependentWidget> {
       badges: const ['dependOn: ✗'],
       buildCount: buildCount,
       child: const Text('InheritedWidget の更新は届かない'),
-    );
-  }
-}
-
-// ============================================================
-// 層ラベル
-// ============================================================
-
-class _LayerLabel extends StatelessWidget {
-  const _LayerLabel(this.label, {required this.color});
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        border: Border(left: BorderSide(color: color, width: 3)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: color,
-          letterSpacing: 0.3,
-        ),
-      ),
     );
   }
 }

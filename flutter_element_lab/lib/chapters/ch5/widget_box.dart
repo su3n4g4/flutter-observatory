@@ -12,6 +12,34 @@ enum WidgetKind {
   final String typeLabel;
 }
 
+/// ツリー階層に左ボーダーで色付きラベルを表示する。
+class LayerLabel extends StatelessWidget {
+  const LayerLabel(this.label, {super.key, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: color, width: 3)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: color,
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+}
+
 /// Widgetツリーの構造を可視化する枠。
 ///
 /// デザイン方針：普段は白地＋細枠で静かに、rebuildされた瞬間だけ黄色く光る。

@@ -48,7 +48,7 @@ class _Ch5P2NotificationBubblePageState
             const Divider(height: 24),
 
             // ページ
-            _LayerLabel('ページ', color: Color(0xFF1976D2)),
+            LayerLabel('ページ', color: Color(0xFF1976D2)),
             WidgetBox(
               kind: WidgetKind.stateful,
               name: 'Ch5P2NotificationBubblePage',
@@ -59,7 +59,7 @@ class _Ch5P2NotificationBubblePageState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // リスナー
-                  _LayerLabel('リスナー', color: Color(0xFFF57C00)),
+                  LayerLabel('リスナー', color: Color(0xFFF57C00)),
                   _VisualNotificationListener(
                     onNotification: (notification) {
                       debugPrint(
@@ -71,7 +71,7 @@ class _Ch5P2NotificationBubblePageState
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // 利用側
-                        _LayerLabel('利用側', color: Color(0xFF616161)),
+                        LayerLabel('利用側', color: Color(0xFF616161)),
                         _DispatchWidget(),
                         _IndependentWidget(),
                       ],
@@ -208,36 +208,6 @@ class _IndependentWidgetState extends State<_IndependentWidget> {
       badges: const ['dispatch: ✗'],
       buildCount: buildCount,
       child: const Text('それでもページ全体の rebuild に巻き込まれる'),
-    );
-  }
-}
-
-// ============================================================
-// 層ラベル
-// ============================================================
-
-class _LayerLabel extends StatelessWidget {
-  const _LayerLabel(this.label, {required this.color});
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        border: Border(left: BorderSide(color: color, width: 3)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: color,
-          letterSpacing: 0.3,
-        ),
-      ),
     );
   }
 }
