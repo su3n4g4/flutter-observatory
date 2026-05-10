@@ -8,7 +8,7 @@ FlutterはどうやってElementの同一性を判断するのか？
 
 ## 前提知識
 
-検証に入る前に、同一性を判断する際のロジックを改めてみていきます。
+検証に入る前に、同一性を判断する際のロジックを確認していきます。
 
 ### canUpdate の判定ロジック
 
@@ -24,9 +24,8 @@ static bool canUpdate(Widget oldWidget, Widget newWidget) {
 }
 ```
 
-:::message
-Key照合が有効な範囲はKeyの種類によって異なり、その差が同一性判断の有効範囲を決めます
-:::
+Key照合が有効な範囲はKeyの種類によって異なり、その差が同一性判断の有効範囲を決めます。
+この章ではkeyを利用しない場合とそれぞれのkeyを利用した場合にどうなるのかを検証していきます。
 
 ### Keyの種類と同一性の有効範囲
 
@@ -35,7 +34,7 @@ Key照合が有効な範囲はKeyの種類によって異なり、その差が�
 | canUpdateの式 | null == null → true（型一致のみ） | runtimeType一致 && Key一致 | runtimeType一致 && Key一致 |
 | Key比較の解決スコープ | なし | 親Elementのchildren内 | BuildOwner._globalKeyRegistry（アプリ全体） |
 | 同一性の有効範囲 | 同じ位置 | 同じ親の兄弟間 | アプリ全体 |
-| 登録場所 | なし | 親Elementのchildren内 | BuildOwner._globalKeyRegistry |
+| 登録場所 | なし | 同じ親を持つ兄弟Element間 | BuildOwner._globalKeyRegistry |
 | 親をまたいだ移動 | 不可（破棄＆再生成） | 不可（破棄＆再生成） | 可（deactivate→activate） |
 | dispose発生 | 位置がずれると発生 | 親が変わると発生 | 発生しない（移動時） |
 | 同時に2箇所に配置 | 可 | 可 | 不可（エラー） |
@@ -43,7 +42,7 @@ Key照合が有効な範囲はKeyの種類によって異なり、その差が�
 
 ---
 
-### Part 1: Keyなしで並べ替え
+## Part 1: Keyなしで並べ替え
 
 Chapter 1 Part 1 と同じ操作です。ここでは結果だけ整理します。
 
@@ -59,7 +58,7 @@ Chapter 1では「Elementは位置に紐づく」という位置管理の観点�
 
 ---
 
-### Part 2: ValueKeyありで並べ替え
+## Part 2: ValueKeyありで並べ替え
 
 **① 初期表示**
 
@@ -101,10 +100,12 @@ Part 1との対比でKeyの有無が何を変えるかが明確になります�
 
 ---
 
-### Part 3の前提：GlobalKeyのレジストリと引き取り
+## Part 3: GlobalKeyの参照保持と配置先切り替え
+
+### 前提：GlobalKeyのレジストリと引き取り
 
 GlobalKeyの `canUpdate` 自体はValueKeyと同じ式となります。
-違うのはKeyの比較が行われるスコープで、ValueKeyが親Elementのchildren内で照合されるのに対し、
+違うのはKeyの比較が行われるスコープで、ValueKeyが同じ親を持つ兄弟Element間で照合されるのに対し、
 GlobalKeyは `BuildOwner` が保持するレジストリで照合されます。
 
 ```dart
@@ -119,7 +120,7 @@ Elementがマウントされる際に自身をこのレジストリに登録し�
 「同じGlobalKeyを同時に2箇所に配置できない」という制約は、このデータ構造が1対1であることから来ています。
 
 新しい位置にGlobalKey付きWidgetが現れたとき、
-`inflateWidget` はレジストリを引き当て、既存Elementを引き取る分岐に入ります。
+`inflateWidget` はレジストリから既存Elementを取り出し、新しい位置で再アクティブ化する分岐に入ります。
 
 ```dart
 // packages/flutter/lib/src/widgets/framework.dart
@@ -138,13 +139,13 @@ Element inflateWidget(Widget newWidget, Object? newSlot) {
 }
 ```
 
-引き取られたElementでは `deactivate → activate` のペアが発生し、
+再アクティブ化されたElementでは `active → inactive → active` の状態遷移（`deactivate()` → `activate()` の順で呼ばれる）が発生し、
 この経路に入る限りElementは `dispose` されません。
-（引き取られずにフレーム末尾まで残ったElementがunmountされる仕組みはChapter 2で扱った通りです）
+（再アクティブ化されずにフレーム末尾まで残ったElementがunmountされる仕組みはChapter 2で扱った通りです）
 
 ---
 
-### Part 3: GlobalKeyの参照保持と配置先切り替え
+### 検証: GlobalKeyの参照保持と配置先切り替え
 
 Chapter 2 Part 3 と同じ操作です。ここでは結果だけ整理します。
 
