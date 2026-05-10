@@ -50,6 +50,8 @@ class _StateTrackerState extends State<StateTracker> {
 
   @override
   Widget build(BuildContext context) {
+    // rebuild の原因（setState / InheritedWidget 更新 / 親の更新）に関わらず
+    // 必ず呼ばれる場所が build() のみのため、ここでカウントする。
     _buildCount++;
     final element = context as Element; // BuildContextの実体はElement
     debugPrint(
