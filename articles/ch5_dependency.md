@@ -234,7 +234,7 @@ bool updateShouldNotify(_DependencyScope oldWidget) {
 
 この出力が得られれば、`updateShouldNotify`が`true`を返したのにindependentが反応しないという事実から、「通知先は依存登録の有無で決まる」「`_dependents`未登録のElementには通知が届かない」という主張がログだけで証明できます。
 
-### Notification用：rebuild範囲が捕捉側に委ねられることを観測する
+### Notification用：rebuild範囲が捕捉側に委ねられることを確認する
 
 Notification側で確かめたいのは、InheritedWidgetとは正反対の主張です：**選択的rebuildのような索引が存在せず、`onNotification`内で`setState`を呼んだ瞬間に捕捉側Element以下が一括でrebuildに巻き込まれる**こと。これを確認するには、通知の到達と、そこから始まる通常のrebuildパスが捕捉側Element配下を一括で巻き込む様子を押さえます。
 
@@ -480,7 +480,7 @@ setState
 
 ### 子からdispatchし、親のNotificationListenerで捕捉する
 
-検証画面の構造は次のとおりです。`NotificationListener`はbuildCountを観測するために`_VisualNotificationListener`（StatefulWidget）でラップしてあります。
+検証画面の構造は次のとおりです。`NotificationListener`はbuildCountを確認するために`_VisualNotificationListener`（StatefulWidget）でラップしてあります。
 
 ```
 _Ch5P2NotificationBubblePage (Stateful, notificationCount=N)
