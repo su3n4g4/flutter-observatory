@@ -172,7 +172,7 @@ class _DispatchWidgetState extends State<_DispatchWidget> {
       buildCount: buildCount,
       child: FilledButton.tonal(
         onPressed: () {
-          const _DemoNotification(message: 'leaf -> bubble').dispatch(context);
+          const _DemoNotification(message: 'dispatch -> bubble').dispatch(context);
         },
         child: const Text('Notification.dispatch で親へ通知する'),
       ),

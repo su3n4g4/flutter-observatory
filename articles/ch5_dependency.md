@@ -18,7 +18,8 @@ Flutterはこれを2つの仕組みで解決します。
 - **InheritedWidget**：親から子孫への「下方向」の値の供給
 - **Notification**：子孫から親への「上方向」のイベントの伝播
 
-両者は方向が逆なだけでなく、**通知先がどう決まるか**が根本的に異なります。InheritedWidgetは「`of()`を呼んだElementだけに通知が届く」という動的な依存登録を持つのに対し、Notificationは「ツリー上にあるListenerが順番に受け取る」という静的な構造解決しか持ちません。この違いを理解するために、まず両者がmount時とbuild時にそれぞれ何を構築しているかを押さえておきます。
+両者は方向が逆なだけでなく、**通知先がどう決まるか**が根本的に異なります。
+InheritedWidgetは「`of(context)`クラスメソッドでInheritedWidgetにアクセスしたElementだけに通知が届く」という動的な依存登録を持つのに対し、Notificationは「ツリー上にあるListenerが順番に受け取る」という静的な構造解決しか持ちません。この違いを理解するために、まず両者がmount時とbuild時にそれぞれ何を構築しているかを押さえておきます。
 
 ### Elementは2系統の補助構造を保持する
 
@@ -61,7 +62,7 @@ void _updateInheritance() {
 
 #### build時：依存登録
 
-`build()`内で`of()`が呼ばれた瞬間に、呼び出し元のElementを「InheritedWidgetが更新されたらrebuildすべき対象」として登録します。
+`build()`内で`of()`が呼ばれた瞬間に、呼び出し元のElementを「InheritedWidgetが更新されたらrebuildすべき対象」として下記のように登録します。
 
 - mount時に作成したマップから祖先のInheritedElementを取得する
 - 呼び出し元のElement（`this`）を祖先の`_dependents`（InheritedElementが保持する通知先リスト）に追加する
@@ -90,7 +91,7 @@ InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? as
 ```
 
 ここで重要なのは登録のタイミングです。
-登録が起きるのは`build()`内で`dependOn`が呼ばれた時点のみで、Widget定義時でもmount時でもありません。
+登録が起きるのは`build()`内で`of()`が呼ばれ、その内部で上記の`dependOnInheritedWidgetOfExactType`が実行された時点のみで、Widget定義時でもmount時でもありません。
 また、同じElementでも、`of()`を呼ばなかったフレームでは依存を失います。
 
 **どのElementが通知を受け取るかはWidgetの静的な構造からは決まらず、build()の実行履歴によって決まります。**
@@ -183,21 +184,25 @@ void dispatchNotification(Notification notification) {
 
 InheritedWidgetは`_dependents`という索引を持つことで、Widgetツリーの親子関係とは独立して通知先を絞れます。対してNotificationは依存登録機構を持たず、rebuildの範囲は捕捉側が`setState`を呼ぶかどうか・どのElementで呼ぶかだけで決まります。
 
+### 検証で確認すること
+
+前提を踏まえた上で、この章では下記を検証していきます。
+
+- **InheritedWidgetは依存元だけをrebuildするか**：InheritedWidgetの値を更新したとき、`of()`を呼んだ子だけがrebuildされ、呼ばなかった子はrebuild対象にはならないか
+- **Notificationはrebuildを制御しないか**：Notificationは`_dependents`のような依存登録を持たず、rebuild範囲は捕捉側の`setState`に委ねられることを示せるか
+
 ## ログの仕込み方
 
-ここまでで、2つの仕組みの違いが分かりました。
+ここでは検証を行うためにどのようにログを仕込んでいるかを解説していきます。
 
-- InheritedWidgetは`_dependents`という索引で通知先を絞り、登録は`build()`内で`dependOn`が呼ばれた時点で起きます
-- Notificationは依存登録機構を持たず、宛先はmount時に決まる`_notificationTree`の構造で固定されます
-- rebuildを起こすかどうかも、前者は索引経由で自動、後者は捕捉側の`setState`次第です
-
+ここまでの流れで、InheritedWidgetとNotificationの仕組みの違いが分かりました。
 これを確認するには、「誰が、いつ、何回rebuildされたか」のログを全Widgetに仕込みます。ただし確認したい事柄は2つの仕組みで異なるので、ログも仕組みごとに分けて設計します。
 
 ### InheritedWidget用：依存登録の有無がrebuildを分けることを確認する
 
 InheritedWidget側で確かめたいのは「`of()`を呼んだElementだけがrebuildされる」という選択性です。これを確認するには、build回数の差と、`_dependents`への通知が走る直前の差分判定タイミングを両方押さえる必要があります。
 
-**[BUILD]：build()内のdebugPrint（dependent/independent両方に仕込む）**
+**[BUILD]：build()内のdebugPrint（`_DependentWidget`/`_IndependentWidget`両方に仕込む）**
 
 ```dart
 @override
@@ -209,7 +214,7 @@ Widget build(BuildContext context) {
 }
 ```
 
-dependent側だけでなくindependent側にも同じ形で仕込みます（`of()`は呼ばない）。両者のbuildカウントを並べて見ることで、依存登録があるElementだけがrebuildされる選択性が直接ログに表れます。
+`_DependentWidget`側だけでなく`_IndependentWidget`側にも同じ形で仕込みます（`of()`は呼ばない）。両者のbuildカウントを並べて見ることで、依存登録があるElementだけがrebuildされる選択性が直接ログに表れます。
 
 **[Inherited]：updateShouldNotify内のdebugPrint**
 
@@ -221,7 +226,7 @@ bool updateShouldNotify(_DependencyScope oldWidget) {
 }
 ```
 
-差分判定が呼ばれたタイミングと新旧値を記録します。`_dependents`への通知が起きる直前の関門であり、ここで`false`が返れば通知自体が起きません。「親はrebuildされた、子の`updateShouldNotify`は呼ばれた、それでもindependentは沈黙した」という3段階の事実が並ぶことで、選択性の根拠が`_dependents`にあることが言えます。
+差分判定が呼ばれたタイミングと新旧値を記録します。`_dependents`への通知が起きる直前の関門であり、ここで`false`が返れば通知自体が起きません。「親はrebuildされた、子の`updateShouldNotify`は呼ばれた、それでも`_IndependentWidget`は沈黙した」という3段階の事実が並ぶことで、選択性の根拠が`_dependents`にあることが言えます。
 
 **期待される出力パターン**
 
@@ -232,7 +237,7 @@ bool updateShouldNotify(_DependencyScope oldWidget) {
 （[BUILD] independentは出ない）                ← 未登録Elementは沈黙
 ```
 
-この出力が得られれば、`updateShouldNotify`が`true`を返したのにindependentが反応しないという事実から、「通知先は依存登録の有無で決まる」「`_dependents`未登録のElementには通知が届かない」という主張がログだけで証明できます。
+この出力が得られれば、`updateShouldNotify`が`true`を返したのに`_IndependentWidget`が反応しないという事実から、「通知先は依存登録の有無で決まる」「`_dependents`未登録のElementには通知が届かない」という主張がログだけで証明できます。
 
 ### Notification用：rebuild範囲が捕捉側に委ねられることを確認する
 
@@ -252,31 +257,24 @@ Notificationが`_notificationTree`チェーンを辿ってListenerに届いた�
 
 **[BUILD]：捕捉側ページと配下Widget全部に仕込む**
 
-InheritedWidget側と同じ`[BUILD]`ログを、捕捉側ページ・dispatch元のleaf・dispatchに関与しないindependentすべてに仕込みます。Notification経由では`onNotification`内の`setState`が通常のrebuildパス（Chapter 4）を起動するため、ページ以下が依存の有無に関係なく全部rebuildされます。これがログでも全Widgetがカウントアップする形で見えます。
+InheritedWidget側と同じ`[BUILD]`ログを、捕捉側ページ・dispatch元の`_DispatchWidget`・dispatchに関与しない`_IndependentWidget`すべてに仕込みます。Notification経由では`onNotification`内の`setState`が通常のrebuildパス（Chapter 4）を起動するため、ページ以下が依存の有無に関係なく全部rebuildされます。これがログでも全Widgetがカウントアップする形で見えます。
 
 **期待される出力パターン**
 
 ```
-[NOTIFICATION] received: leaf -> bubble        ← _notificationTreeを辿って捕捉
+[NOTIFICATION] received: dispatch -> bubble     ← _notificationTreeを辿って捕捉
 [BUILD] page (#N)                              ← setState起点の通常rebuildパス
 [BUILD] dispatch widget (#N)                 ← 配下なので巻き込まれる
 [BUILD] independent widget (#N)                ← 依存していなくても巻き込まれる
 ```
 
-この出力が得られれば、「Notification自体はrebuildを起こさず、捕捉側`setState`が通常のrebuildパスを起動する」「依存登録機構を持たないので範囲は絞れない」という主張がログだけで言えます。InheritedWidget側でindependentが沈黙したのと対比すれば、両者の挙動の差が依存登録機構の有無に帰着することも明確になります。
-
-### この章で確認すること
-
-前提を踏まえると、この章の検証シナリオが何を確認しようとしているかが分かります。
-
-- **依存登録による選択的rebuildの確認**：InheritedWidgetの値を更新したとき、`of()`を呼んだ子だけがrebuildされ、呼ばなかった子は沈黙するか（基本）
-- **登録機構を持たない経路の確認**：Notificationは`_dependents`のような依存登録を持たず、rebuild範囲は捕捉側の`setState`に委ねられることを示せるか（派生）
+この出力が得られれば、「Notification自体はrebuildを起こさず、捕捉側`setState`が通常のrebuildパスを起動する」「依存登録機構を持たないので範囲は絞れない」という主張がログだけで言えます。InheritedWidget側で`_IndependentWidget`が沈黙したのと対比すれば、両者の挙動の差が依存登録機構の有無に帰着することも明確になります。
 
 ---
 
-## dependOnを呼んだ子だけがrebuildされる
+## InheritedWidgetは依存元だけをrebuildするか
 
-前提で「依存登録による選択的rebuild」の仕組みを見ました。ここではそれを実際のログで確認します。
+それでは、実際にログを見ながら、InheritedWidgetの挙動を確認していきます。
 
 ### InheritedWidget配下に「依存あり」「依存なし」の子を並べる
 
@@ -394,7 +392,7 @@ class _IndependentWidgetState extends State<_IndependentWidget> {
 
 **① 初期表示**
 
-画面を開きます。`_VisualDependencyScope`、dependent、independentがすべて初回buildされます。
+画面を開きます。`_VisualDependencyScope`、`_DependentWidget`、`_IndependentWidget`がすべて初回buildされます。
 
 ```
 [Scope] build (#1) value=0
@@ -406,7 +404,7 @@ class _IndependentWidgetState extends State<_IndependentWidget> {
 
 - `_DependentWidget`：build内で`_DependencyScope.of(context)`が呼ばれ、`InheritedElement._dependents`に自分自身を登録（前提で見た`dependOnInheritedElement → updateDependencies`の経路）
 - `_IndependentWidget`：`of()`を呼ばないので`_dependents`には載りません
-- 結果として、`_dependents`には dependent だけが登録された状態になります
+- 結果として、`_dependents`には`_DependentWidget`だけが登録された状態になります
 
 **② 「valueを更新」ボタン押下**
 
@@ -450,8 +448,8 @@ sequenceDiagram
 4. **[ログ出力] `[Inherited] updateShouldNotify old=0 new=1`**：差分判定が`true`を返します
 5. **[内部処理]**：`notifyClients()`が`_dependents`を走査します
 6. **[内部処理]**：登録済みElementで`didChangeDependencies` → `markNeedsBuild`
-7. **[ログ出力] `[BUILD] dependent (#2) value=1`**：登録済みのdependentだけがrebuildされます
-8. **[沈黙] `[BUILD] independent`は出ません**：`_dependents`に載っていないので通知が届きません
+7. **[ログ出力] `[BUILD] dependent (#2) value=1`**：登録済みの`_DependentWidget`だけがrebuildされます
+8. **[ログ出力] `[BUILD] independent`は出ません**：`_dependents`に載っていないので通知が届きません
 
 **ログの順序が示す時間差**
 
@@ -470,13 +468,13 @@ setState
           → dependentのrebuild（[BUILD] dependent）
 ```
 
-そして`[BUILD] independent`が出ないことで、`_dependents`に登録されたElementだけが通知を受ける仕組みが働いていることが裏付けられます。`of()`を呼んだdependentは登録されており、呼ばなかったindependentは登録されていません。**依存登録の有無が、rebuildの有無を直接決定しています。**
+そして`[BUILD] independent`が出ないことで、`_dependents`に登録されたElementだけが通知を受ける仕組みが働いていることが裏付けられます。`of()`を呼んだ`_DependentWidget`は登録されており、呼ばなかった`_IndependentWidget`は登録されていません。**依存登録の有無が、rebuildの有無を直接決定しています。**
 
 ---
 
-## Notificationには登録機構がない
+## Notificationはrebuildを制御しないか
 
-基本では、InheritedWidgetが`_dependents`という独自の索引で通知先を絞ることを確認しました。では、同じ「ツリーをまたいだ通信」の仕組みでも、登録機構を持たないNotificationではrebuildの範囲がどう決まるのでしょうか。前提で見た「捕捉側の`setState`に依存する」ことをログで確認します。
+前の検証では、InheritedWidgetが`_dependents`という独自の索引で通知先を絞ることを確認しました。では、同じ「ツリーをまたいだ通信」の仕組みでも、依存登録機構を持たないNotificationではrebuildの範囲がどう決まるのかをログで確認します。
 
 ### 子からdispatchし、親のNotificationListenerで捕捉する
 
@@ -569,7 +567,7 @@ class _DispatchWidgetState extends State<_DispatchWidget> {
       buildCount: buildCount,
       child: FilledButton.tonal(
         onPressed: () {
-          const _DemoNotification(message: 'leaf -> bubble').dispatch(context);
+          const _DemoNotification(message: 'dispatch -> bubble').dispatch(context);
         },
         child: const Text('Notification.dispatch で親へ通知する'),
       ),
@@ -605,7 +603,7 @@ class _DemoNotification extends Notification {
 
 **① 初期表示**
 
-画面を開きます。ページ、leaf、independentがすべて初回buildされます。
+画面を開きます。ページ、`_DispatchWidget`、`_IndependentWidget`がすべて初回buildされます。
 
 ```
 [BUILD] Ch5 P2 page (#1)
@@ -617,7 +615,7 @@ class _DemoNotification extends Notification {
 
 - 各Element：mount時に`attachNotificationTree`が呼ばれ、親の`_notificationTree`を引き継ぎます
 - `_VisualNotificationListener`配下の`NotificationListener`：`_NotificationNode`を生成して連結リストの先頭に追加します
-- 結果として、leaf と independent は同じ`_notificationTree`を保持し、その先頭ノードが`NotificationListener`を指しています
+- 結果として、`_DispatchWidget` と `_IndependentWidget` は同じ`_notificationTree`を保持し、その先頭ノードが`NotificationListener`を指しています
 - ただし、基本と異なり「どのElementが将来rebuildされるか」という依存情報はどこにも持ちません
 
 **② ボタン押下（Notification.dispatch）**
@@ -625,13 +623,13 @@ class _DemoNotification extends Notification {
 末端のボタンを押します。`_DemoNotification`がdispatchされます。
 
 ```
-[NOTIFICATION] received: leaf -> bubble
+[NOTIFICATION] received: dispatch -> bubble
 [BUILD] Ch5 P2 page (#2)
 [BUILD] dispatch widget (#2)
 [BUILD] independent widget (#2)
 ```
 
-`[BUILD] dispatch widget`と`[BUILD] independent widget`の**両方**が`(#2)`にカウントアップします。ここが基本のログとの決定的な違いです。基本ではindependentは沈黙したままでしたが、派生ではdispatchに関与しないindependentも巻き込まれています。ここで起きている処理を順を追って見ます。
+`[BUILD] dispatch widget`と`[BUILD] independent widget`の**両方**が`(#2)`にカウントアップします。ここが基本のログとの決定的な違いです。基本では`_IndependentWidget`は沈黙したままでしたが、派生ではdispatchに関与しない`_IndependentWidget`も巻き込まれています。ここで起きている処理を順を追って見ます。
 
 ```mermaid
 sequenceDiagram
@@ -658,8 +656,8 @@ sequenceDiagram
 ステップごとに整理すると：
 
 1. **[ユーザー操作]**：ボタン押下で`_DemoNotification.dispatch(context)`が呼ばれます
-2. **[内部処理]**：`context.dispatchNotification`が leaf の Element が保持する`_notificationTree`を起点にチェーンを走査します
-3. **[ログ出力] `[NOTIFICATION] received: leaf -> bubble`**：`_NotificationElement`で型一致を確認し、コールバックを実行します
+2. **[内部処理]**：`context.dispatchNotification`が`_DispatchWidget`の Element が保持する`_notificationTree`を起点にチェーンを走査します
+3. **[ログ出力] `[NOTIFICATION] received: dispatch -> bubble`**：`_NotificationElement`で型一致を確認し、コールバックを実行します
 4. **[コールバック内]**：`setState(() => notificationCount += 1)`で`Ch5P2Page`がdirtyになります
 5. **[ログ出力] `[BUILD] Ch5 P2 page (#2)`**：通常のrebuildパス（Chapter 4）が起動します
 6. **[ログ出力] `[BUILD] dispatch widget (#2)`**：親rebuildに巻き込まれます
@@ -681,11 +679,11 @@ rebuild経路（Chapter 4の通常setState）:
 
 Notification経路にはInheritedWidgetでいう`_dependents`のような選択的な索引が存在しません。捕捉後の`setState`は通常のrebuildパスをそのまま起動するため、捕捉側Element以下のWidgetは依存の有無に関係なく全て巻き込まれます。
 
-independentが`[BUILD]`を出したのは、**Notificationに反応したからではなく**、親の`setState`によって通常のrebuild経路に乗っただけです。ログ上は`[NOTIFICATION] received`と`[BUILD] independent widget`が連続して見えますが、両者の因果関係は「Notification → independent」ではなく「Notification → setState → 親rebuild → 配下全部」という二段構えになっています。**Notification自体には範囲を絞る仕組みがないので、rebuildの広さは捕捉側がどのElementで`setState`を呼ぶかだけで決まります。**
+`_IndependentWidget`が`[BUILD]`を出したのは、**Notificationに反応したからではなく**、親の`setState`によって通常のrebuild経路に乗っただけです。ログ上は`[NOTIFICATION] received`と`[BUILD] independent widget`が連続して見えますが、両者の因果関係は「Notification → `_IndependentWidget`」ではなく「Notification → setState → 親rebuild → 配下全部」という二段構えになっています。**Notification自体には範囲を絞る仕組みがないので、rebuildの広さは捕捉側がどのElementで`setState`を呼ぶかだけで決まります。**
 
 ### この検証からわかること
 
-基本と派生を合わせて確認できたのは、「ツリーをまたいだ通信」と一口に言っても、rebuildの範囲を決める仕組みは両者で全く異なるということです。
+InheritedWidgetとNotificationから確認できたのは、「ツリーをまたいだ通信」と一口に言っても、rebuildの範囲を決める仕組みは両者で全く異なるということです。
 
 - InheritedWidgetは`_dependents`という独自の索引を持つので、`of()`を呼んだElementにだけrebuildを届けられます
 - Notificationは登録機構を持たないので、rebuild範囲は捕捉側の`setState`が張る通常の経路そのものになります
