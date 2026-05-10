@@ -195,7 +195,7 @@ InheritedWidgetは`_dependents`という索引を持つことで、Widgetツリ�
 
 ### InheritedWidget用：依存登録の有無がrebuildを分けることを確認する
 
-InheritedWidget側で確かめたいのは「`of()`を呼んだElementだけがrebuildされる」という選択性です。これを観測するには、build回数の差と、`_dependents`への通知が走る直前の差分判定タイミングを両方押さえる必要があります。
+InheritedWidget側で確かめたいのは「`of()`を呼んだElementだけがrebuildされる」という選択性です。これを確認するには、build回数の差と、`_dependents`への通知が走る直前の差分判定タイミングを両方押さえる必要があります。
 
 **[BUILD]：build()内のdebugPrint（dependent/independent両方に仕込む）**
 
@@ -236,7 +236,7 @@ bool updateShouldNotify(_DependencyScope oldWidget) {
 
 ### Notification用：rebuild範囲が捕捉側に委ねられることを観測する
 
-Notification側で確かめたいのは、InheritedWidgetとは正反対の主張です：**選択的rebuildのような索引が存在せず、`onNotification`内で`setState`を呼んだ瞬間に捕捉側Element以下が一括でrebuildに巻き込まれる**こと。これを観測するには、通知の到達と、そこから始まる通常のrebuildパスが捕捉側Element配下を一括で巻き込む様子を押さえます。
+Notification側で確かめたいのは、InheritedWidgetとは正反対の主張です：**選択的rebuildのような索引が存在せず、`onNotification`内で`setState`を呼んだ瞬間に捕捉側Element以下が一括でrebuildに巻き込まれる**こと。これを確認するには、通知の到達と、そこから始まる通常のrebuildパスが捕捉側Element配下を一括で巻き込む様子を押さえます。
 
 **[NOTIFICATION]：onNotificationコールバック内のdebugPrint**
 

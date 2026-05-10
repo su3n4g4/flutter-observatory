@@ -192,7 +192,7 @@ Stateの各コールバックと呼び出し元を一覧にします。`State.se
 
 ## StateTrackerとログの読み方
 
-ここまでの前提知識で登場したElementのメソッド（`StatefulElement._firstBuild`、`Element.update`、`Element.deactivateChild`、`StatefulElement.unmount`など）は、実際の検証では直接見えません。代わりに、これらのメソッドが呼び出すState側のコールバックがログとして観測できます。それを出力するのが`StateTracker`です。
+ここまでの前提知識で登場したElementのメソッド（`StatefulElement._firstBuild`、`Element.update`、`Element.deactivateChild`、`StatefulElement.unmount`など）は、実際の検証では直接見えません。代わりに、これらのメソッドが呼び出すState側のコールバックがログとして確認できます。それを出力するのが`StateTracker`です。
 
 ### StateTrackerとは
 
