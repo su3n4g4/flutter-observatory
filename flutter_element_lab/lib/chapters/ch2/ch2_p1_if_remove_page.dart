@@ -14,7 +14,7 @@ class _Ch2P1IfRemovePageState extends State<Ch2P1IfRemovePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch2 P1: if で消す（dispose）')),
+      appBar: AppBar(title: const Text('Chapter 2 Part 1: if で消す（dispose）')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -17,7 +17,7 @@ class _Ch3P2ValueKeyPageState extends State<Ch3P2ValueKeyPage> {
     final labels = reversed ? ['C', 'B', 'A'] : ['A', 'B', 'C'];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch3 P2: 並べ替え（ValueKey）')),
+      appBar: AppBar(title: const Text('Chapter 3 Part 2: 並べ替え（ValueKey）')),
       body: Column(
         children: [
           const SizedBox(height: 12),

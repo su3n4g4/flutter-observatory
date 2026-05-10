@@ -23,7 +23,7 @@ class _Ch5P2NotificationBubblePageState
     debugPrint('[BUILD] Ch5 P2 page (#$pageBuildCount)');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch5 P2: Notificationのバブルアップ')),
+      appBar: AppBar(title: const Text('Chapter 5 Part 2: Notificationのバブルアップ')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -42,7 +42,7 @@ class _Ch5P2NotificationBubblePageState
             const Text(
               '・Notification.dispatch はツリーを子から親へバブルアップする\n'
               '・NotificationListener がバブルアップしてきた通知を捕捉する\n'
-              '・捕捉側で setState を呼ぶとページ全体が rebuild される（= P1 との対比）',
+              '・捕捉側で setState を呼ぶとページ全体が rebuild される（= Part 1 との対比）',
               style: TextStyle(fontSize: 13),
             ),
             const Divider(height: 24),

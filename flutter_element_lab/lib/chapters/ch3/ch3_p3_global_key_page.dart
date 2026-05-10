@@ -20,7 +20,7 @@ class _Ch3P3GlobalKeyPageState extends State<Ch3P3GlobalKeyPage> {
     final keyedTracker = StateTracker('GLOBAL-KEYED', key: _probeKey);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch3 P3: GlobalKey で移動')),
+      appBar: AppBar(title: const Text('Chapter 3 Part 3: GlobalKey で移動')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

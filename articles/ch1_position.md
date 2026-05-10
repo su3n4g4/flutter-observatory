@@ -1,4 +1,4 @@
-# Ch1: Elementツリーの位置管理
+# Chapter 1: Elementツリーの位置管理
 
 ▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-element-lab/tree/main/flutter_element_lab/lib/chapters/ch1)　▶ [検証画面](https://su3n4g4.github.io/flutter-element-lab/)
 
@@ -12,7 +12,7 @@
 
 まず「同じ親のColumn内で子の並びや数が変わったとき、Elementはどう反応するか」を確認します。
 
-### P1: 並べ替え（Keyなし）
+### Part 1: 並べ替え（Keyなし）
 
 **① 初期表示**
 
@@ -71,7 +71,7 @@ build: C  state=478239687  depth=155  widgetType=StateTracker  element=StatefulE
 
 ---
 
-### P2: 条件付き挿入・削除
+### Part 2: 条件付き挿入・削除
 
 **① 初期表示**
 
@@ -140,7 +140,7 @@ dispose: C  state=587597996
 
 ### この検証からわかること
 
-P1とP2に共通しているのは、「同じ親の中で、同じ位置に同じruntimeTypeのWidgetが来れば、Elementは再利用される」というルールです。Elementは位置に紐づいていて、Widgetの中身が変わっても位置が同じなら生き残ります。
+Part 1とPart 2に共通しているのは、「同じ親の中で、同じ位置に同じruntimeTypeのWidgetが来れば、Elementは再利用される」というルールです。Elementは位置に紐づいていて、Widgetの中身が変わっても位置が同じなら生き残ります。
 
 ---
 
@@ -148,7 +148,7 @@ P1とP2に共通しているのは、「同じ親の中で、同じ位置に同�
 
 基本ルールが「同じ親の中での再利用」だと分かったところで、次は「では親が変わったらどうなるのか？」確認していきます。
 
-### P3: 親の切り替え
+### Part 3: 親の切り替え
 
 **① 初期表示**
 
@@ -193,7 +193,7 @@ dispose: P  state=292546343
 | Right | — | State 292546343（新規） | — |
 
 
-**確認できたこと：** 親が変わると、Elementは再利用されず破棄・再生成されます。P1・P2で見た位置ベースの再利用は「同じ親の配下」というスコープに閉じています。
+**確認できたこと：** 親が変わると、Elementは再利用されず破棄・再生成されます。Part 1・Part 2で見た位置ベースの再利用は「同じ親の配下」というスコープに閉じています。
 
 ---
 
@@ -203,9 +203,9 @@ dispose: P  state=292546343
 
 ---
 
-## Keyがあると位置ルールはどう変わるか（→ Ch3）
+## Keyがあると位置ルールはどう変わるか（→ Chapter 3）
 
-### P1-b: 並べ替え（Keyあり）
+### Part 1-b: 並べ替え（Keyあり）
 
 **① 初期表示**
 
@@ -248,15 +248,15 @@ build: C  state=68835919  depth=155  widgetType=StateTracker  element=StatefulEl
 
 P1（Keyなし）と比較します。
 
-|  | P1（Keyなし） | P1-b（Keyあり） |
+|  | Part 1（Keyなし） | Part 1-b（Keyあり） |
 | --- | --- | --- |
 | 位置0のState | 615888068のまま（Aの位置に留まる） | 68835919に変わる（Cと一緒に移動） |
 | ログ | didUpdateWidget: A -> C | didUpdateWidget: C -> C（labelは変わらない） |
 | Stateの追従先 | 位置 | label（Key） |
 
-P1では`didUpdateWidget: A -> C`のように、位置に残ったElementが異なるlabelのWidgetを受け取っています。P1-bでは`didUpdateWidget: C -> C`のように、Elementは同じlabelのWidgetを受け取っています。ValueKeyがあると、ElementはKeyに一致する相手を探して紐づいて移動するため、新しい位置でも同じlabelのWidgetに更新されます。state idがlabelと一緒に移動しているのがその証拠です。
+Part 1では`didUpdateWidget: A -> C`のように、位置に残ったElementが異なるlabelのWidgetを受け取っています。Part 1-bでは`didUpdateWidget: C -> C`のように、Elementは同じlabelのWidgetを受け取っています。ValueKeyがあると、ElementはKeyに一致する相手を探して紐づいて移動するため、新しい位置でも同じlabelのWidgetに更新されます。state idがlabelと一緒に移動しているのがその証拠です。
 
-**確認できたこと：** Keyがあると、位置ベースの再利用ルールが変わります。Elementはlabel（Key）に紐づいて移動します。この判定メカニズムの詳細はCh3で扱います。
+**確認できたこと：** Keyがあると、位置ベースの再利用ルールが変わります。Elementはlabel（Key）に紐づいて移動します。この判定メカニズムの詳細はChapter 3で扱います。
 
 ---
 
@@ -264,10 +264,10 @@ P1では`didUpdateWidget: A -> C`のように、位置に残ったElementが異�
 
 | シナリオ | 確認できたこと |
 | --- | --- |
-| P1: 並べ替え（Keyなし） | 位置が同じでruntimeTypeが一致すればElementは再利用される。Widgetのlabelが変わってもdidUpdateWidgetで差し替えが起き、disposeは出ない |
-| P2: 条件付き挿入・削除 | 先頭から位置ベースでupdateが走る。末尾で余った部分だけinitState（生成）またはdispose（破棄）が起きる |
-| P3: 親の切り替え | 親が変わるとElementは再利用されない。dispose → initStateで毎回新しいStateが生成される |
-| P1-b: 並べ替え（Keyあり） | ValueKeyがあるとElementはKeyに紐づいて移動する。StateがlabelのKeyに追従するため、countとlabelの対応が維持される |
+| Part 1: 並べ替え（Keyなし） | 位置が同じでruntimeTypeが一致すればElementは再利用される。Widgetのlabelが変わってもdidUpdateWidgetで差し替えが起き、disposeは出ない |
+| Part 2: 条件付き挿入・削除 | 先頭から位置ベースでupdateが走る。末尾で余った部分だけinitState（生成）またはdispose（破棄）が起きる |
+| Part 3: 親の切り替え | 親が変わるとElementは再利用されない。dispose → initStateで毎回新しいStateが生成される |
+| Part 1-b: 並べ替え（Keyあり） | ValueKeyがあるとElementはKeyに紐づいて移動する。StateがlabelのKeyに追従するため、countとlabelの対応が維持される |
 
 ---
 

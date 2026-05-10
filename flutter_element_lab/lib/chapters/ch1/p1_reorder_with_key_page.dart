@@ -17,7 +17,7 @@ class _P1ReorderWithKeyPageState extends State<P1ReorderWithKeyPage> {
     final labels = reversed ? ['C', 'B', 'A'] : ['A', 'B', 'C'];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('P1: 並べ替え（Keyあり）')),
+      appBar: AppBar(title: const Text('Chapter 1 Part 1: 並べ替え（Keyあり）')),
       body: Column(
         children: [
           const SizedBox(height: 12),

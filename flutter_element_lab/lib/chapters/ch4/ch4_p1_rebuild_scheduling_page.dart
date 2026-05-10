@@ -54,7 +54,7 @@ class _Ch4P1RebuildSchedulingPageState extends State<Ch4P1RebuildSchedulingPage>
     debugPrint('[BUILD] parent page');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch4 P1: 再構築スケジューリング')),
+      appBar: AppBar(title: const Text('Chapter 4 Part 1: 再構築スケジューリング')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

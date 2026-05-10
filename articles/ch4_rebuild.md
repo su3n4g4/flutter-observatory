@@ -1,4 +1,4 @@
-# Ch4: 再構築スケジューリング
+# Chapter 4: 再構築スケジューリング
 
 ▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-element-lab/tree/main/flutter_element_lab/lib/chapters/ch4)　▶ [検証画面](https://su3n4g4.github.io/flutter-element-lab/)
 
@@ -278,7 +278,7 @@ void markNeedsBuild() {
 
 `if (dirty) return;`により、setStateを何回呼んでもdirtyリストへの登録は1回だけになります。1回目のsetStateで`_dirty = true`になった後、2回目・3回目はdirtyチェックでreturnします。
 
-ライフサイクルガードにより、ツリーに接続中（active）のElementだけが先に進めます。Ch2で確認した「ツリーから外れたElement」はここで弾かれます。
+ライフサイクルガードにより、ツリーに接続中（active）のElementだけが先に進めます。Chapter 2で確認した「ツリーから外れたElement」はここで弾かれます。
 
 ---
 
@@ -415,5 +415,5 @@ build: child-B  state=433407290  depth=180  widgetType=StateTracker  element=Sta
 ## 実装時に気をつけること
 
 - setStateを何回呼んでもbuildはフレームあたり1回にまとまるため、setState呼び出しの回数自体はパフォーマンス上の問題になりません。問題になるのはbuildが走るWidgetの範囲（スコープ）です。setStateを呼ぶStatefulWidgetがツリーの上位にあるほど、rebuildされる子孫の数が増えます。
-- 非同期完了後のsetStateでは、呼び出し前に`mounted`チェックが必要です。Futureの完了を待っている間にElementがツリーから外れている（Ch2で確認したdispose）可能性があります。前提で見たmarkNeedsBuildのライフサイクルガードがこの安全弁ですが、`mounted`チェックはそれ以前にアプリコード側で行うべき慣習です。
+- 非同期完了後のsetStateでは、呼び出し前に`mounted`チェックが必要です。Futureの完了を待っている間にElementがツリーから外れている（Chapter 2で確認したdispose）可能性があります。前提で見たmarkNeedsBuildのライフサイクルガードがこの安全弁ですが、`mounted`チェックはそれ以前にアプリコード側で行うべき慣習です。
 - rebuildの順序は開発者が制御するものではなく、BuildOwnerがdepth順で自動的に決定します。特定の順序に依存するコードを書くと、ツリー構造の変更で予期しない動作を招きます。

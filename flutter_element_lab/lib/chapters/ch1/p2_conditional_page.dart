@@ -15,7 +15,7 @@ class _P2ConditionalPageState extends State<P2ConditionalPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('P2: 条件付き挿入・削除')),
+      appBar: AppBar(title: const Text('Chapter 1 Part 2: 条件付き挿入・削除')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

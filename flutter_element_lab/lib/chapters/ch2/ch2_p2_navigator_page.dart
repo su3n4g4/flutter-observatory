@@ -7,7 +7,7 @@ class Ch2P2NavigatorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch2 P2: Navigator push/pop')),
+      appBar: AppBar(title: const Text('Chapter 2 Part 2: Navigator push/pop')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

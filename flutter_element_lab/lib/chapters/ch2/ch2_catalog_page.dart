@@ -19,9 +19,9 @@ class Ch2CatalogPage extends StatelessWidget {
           children: [
             const Text('目的：Element が State の生成/更新/破棄を管理する事実を観測する。'),
             const SizedBox(height: 16),
-            const NavButton(title: 'P1: if で消す（dispose）', page: Ch2P1IfRemovePage()),
-            const NavButton(title: 'P2: Navigator push/pop', page: Ch2P2NavigatorPage()),
-            const NavButton(title: 'P3: GlobalKey で移動', page: Ch2P3GlobalKeyMovePage()),
+            const NavButton(title: 'Part 1: if で消す（dispose）', page: Ch2P1IfRemovePage()),
+            const NavButton(title: 'Part 2: Navigator push/pop', page: Ch2P2NavigatorPage()),
+            const NavButton(title: 'Part 3: GlobalKey で移動', page: Ch2P3GlobalKeyMovePage()),
           ],
         ),
       ),

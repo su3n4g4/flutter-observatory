@@ -20,7 +20,7 @@ class _Ch2P3GlobalKeyMovePageState extends State<Ch2P3GlobalKeyMovePage> {
     Widget keyedProbe() => StateTracker('GLOBAL-KEYED', key: _probeKey);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('P3: GlobalKey で移動')),
+      appBar: AppBar(title: const Text('Chapter 2 Part 3: GlobalKey で移動')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

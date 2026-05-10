@@ -8,7 +8,7 @@ class Ch5P1InheritedDependencyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch5 P1: InheritedWidget 依存')),
+      appBar: AppBar(title: const Text('Chapter 5 Part 1: InheritedWidget 依存')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -20,7 +20,7 @@ class Ch5P1InheritedDependencyPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'この章で観測すること',
+              'この章で確認すること',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),

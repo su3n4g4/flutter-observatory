@@ -17,7 +17,7 @@ class _Ch3P1NoKeyPageState extends State<Ch3P1NoKeyPage> {
     final labels = reversed ? ['C', 'B', 'A'] : ['A', 'B', 'C'];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch3 P1: 並べ替え（Keyなし）')),
+      appBar: AppBar(title: const Text('Chapter 3 Part 1: 並べ替え（Keyなし）')),
       body: Column(
         children: [
           const SizedBox(height: 12),

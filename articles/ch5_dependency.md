@@ -1,4 +1,4 @@
-# Ch5: 依存と通知の管理
+# Chapter 5: 依存と通知の管理
 
 ▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-element-lab/tree/main/flutter_element_lab/lib/chapters/ch5)　▶ [検証画面](https://su3n4g4.github.io/flutter-element-lab/)
 
@@ -11,7 +11,7 @@
 ## 前提：InheritedWidgetとNotificationは何をしているのか
 
 こちらも検証に入る前にInheritedWidgeとNotificationの前提知識から説明していきます。
-`setState`はElement自身を再構築するための仕組みでした（Ch4）。しかし実アプリでは、自分自身ではなくツリーの離れた場所にあるWidgetに変更を届けたい場面があります。親が持つテーマ色を深い子孫で使いたい、子孫でのイベントを親に知らせたい、といった要求です。
+`setState`はElement自身を再構築するための仕組みでした（Chapter 4）。しかし実アプリでは、自分自身ではなくツリーの離れた場所にあるWidgetに変更を届けたい場面があります。親が持つテーマ色を深い子孫で使いたい、子孫でのイベントを親に知らせたい、といった要求です。
 
 Flutterはこれを2つの仕組みで解決します。
 
@@ -168,7 +168,7 @@ void dispatchNotification(Notification notification) {
 
 ここで重要なのは、**通知の宛先がツリー構造（mount時に決まる静的な配置）から完全に決まっていて、build()内で何を呼ぼうと宛先は変わらない**ということです。InheritedWidgetが`of()`を呼んだElementを動的に`_dependents`へ登録するのとは対照的に、Notificationは「誰が通知を受け取るか」を構造そのもので固定しています。
 
-そして、Notificationそれ自体はrebuildを起こしません。rebuildが起きるかどうかは、Listenerが`onNotification`コールバックの中で`setState`を呼ぶかどうかに依存します。呼べば通常のsetStateと同じ経路（Ch4）でrebuildが起き、呼ばなければ何も起きません。
+そして、Notificationそれ自体はrebuildを起こしません。rebuildが起きるかどうかは、Listenerが`onNotification`コールバックの中で`setState`を呼ぶかどうかに依存します。呼べば通常のsetStateと同じ経路（Chapter 4）でrebuildが起き、呼ばなければ何も起きません。
 
 ### 2つの経路の対比
 
@@ -252,7 +252,7 @@ Notificationが`_notificationTree`チェーンを辿ってListenerに届いた�
 
 **[BUILD]：捕捉側ページと配下Widget全部に仕込む**
 
-InheritedWidget側と同じ`[BUILD]`ログを、捕捉側ページ・dispatch元のleaf・dispatchに関与しないindependentすべてに仕込みます。Notification経由では`onNotification`内の`setState`が通常のrebuildパス（Ch4）を起動するため、ページ以下が依存の有無に関係なく全部rebuildされます。これがログでも全Widgetがカウントアップする形で見えます。
+InheritedWidget側と同じ`[BUILD]`ログを、捕捉側ページ・dispatch元のleaf・dispatchに関与しないindependentすべてに仕込みます。Notification経由では`onNotification`内の`setState`が通常のrebuildパス（Chapter 4）を起動するため、ページ以下が依存の有無に関係なく全部rebuildされます。これがログでも全Widgetがカウントアップする形で見えます。
 
 **期待される出力パターン**
 
@@ -504,7 +504,7 @@ class _Ch5P2NotificationBubblePageState
     debugPrint('[BUILD] Ch5 P2 page (#$pageBuildCount)');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ch5 P2: Notification バブルアップ')),
+      appBar: AppBar(title: const Text('Chapter 5 Part 2: Notificationのバブルアップ')),
       body: WidgetBox(
         kind: WidgetKind.stateful,
         name: 'Ch5P2NotificationBubblePage',
@@ -661,7 +661,7 @@ sequenceDiagram
 2. **[内部処理]**：`context.dispatchNotification`が leaf の Element が保持する`_notificationTree`を起点にチェーンを走査します
 3. **[ログ出力] `[NOTIFICATION] received: leaf -> bubble`**：`_NotificationElement`で型一致を確認し、コールバックを実行します
 4. **[コールバック内]**：`setState(() => notificationCount += 1)`で`Ch5P2Page`がdirtyになります
-5. **[ログ出力] `[BUILD] Ch5 P2 page (#2)`**：通常のrebuildパス（Ch4）が起動します
+5. **[ログ出力] `[BUILD] Ch5 P2 page (#2)`**：通常のrebuildパス（Chapter 4）が起動します
 6. **[ログ出力] `[BUILD] dispatch widget (#2)`**：親rebuildに巻き込まれます
 7. **[ログ出力] `[BUILD] independent widget (#2)`**：依存関係に関わらず、親rebuildに巻き込まれます
 
@@ -673,7 +673,7 @@ sequenceDiagram
 通知経路（Notification側）:
   dispatch → _notificationTree → onNotification
 
-rebuild経路（Ch4の通常setState）:
+rebuild経路（Chapter 4の通常setState）:
   setState → markNeedsBuild → 次フレームで親build → 配下を全部rebuild
 ```
 

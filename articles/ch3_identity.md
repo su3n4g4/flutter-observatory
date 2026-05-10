@@ -1,4 +1,4 @@
-# Ch3: 同一性管理（Key）
+# Chapter 3: 同一性管理（Key）
 
 ▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-element-lab/tree/main/flutter_element_lab/lib/chapters/ch3)　▶ [検証画面](https://su3n4g4.github.io/flutter-element-lab/)
 
@@ -43,11 +43,11 @@ Key照合が有効な範囲はKeyの種類によって異なり、その差が�
 
 ---
 
-### P1: Keyなしで並べ替え
+### Part 1: Keyなしで並べ替え
 
-Ch1 P1 と同じ操作です。ここでは結果だけ整理します。
+Chapter 1 Part 1 と同じ操作です。ここでは結果だけ整理します。
 
-Ch1では「Elementは位置に紐づく」という位置管理の観点から確認しました。この章では同一性管理の観点から見ます。Keyがない場合、`canUpdate` はruntimeTypeのみで判定するため、Elementの同一性は位置で決まります。これがP2（ValueKey）との対比基準となります。
+Chapter 1では「Elementは位置に紐づく」という位置管理の観点から確認しました。この章では同一性管理の観点から見ます。Keyがない場合、`canUpdate` はruntimeTypeのみで判定するため、Elementの同一性は位置で決まります。これがPart 2（ValueKey）との対比基準となります。
 
 | 操作後の表示位置 | label | state hashCode |
 | --- | --- | --- |
@@ -59,7 +59,7 @@ Ch1では「Elementは位置に紐づく」という位置管理の観点から�
 
 ---
 
-### P2: ValueKeyありで並べ替え
+### Part 2: ValueKeyありで並べ替え
 
 **① 初期表示**
 
@@ -97,11 +97,11 @@ build: A  state=110179758  depth=153  widgetType=StateTracker  element=StatefulE
 
 **確認できたこと：** ValueKeyがある場合、`canUpdate` は親のchildren内でKey一致するElementを探して再利用します。
 StateはlabelのKeyに紐づいているため、表示位置が変わっても state hashCode がlabelと一緒に移動します。
-P1との対比でKeyの有無が何を変えるかが明確になります。
+Part 1との対比でKeyの有無が何を変えるかが明確になります。
 
 ---
 
-### P3の前提：GlobalKeyのレジストリと引き取り
+### Part 3の前提：GlobalKeyのレジストリと引き取り
 
 GlobalKeyの `canUpdate` 自体はValueKeyと同じ式となります。
 違うのはKeyの比較が行われるスコープで、ValueKeyが親Elementのchildren内で照合されるのに対し、
@@ -140,15 +140,15 @@ Element inflateWidget(Widget newWidget, Object? newSlot) {
 
 引き取られたElementでは `deactivate → activate` のペアが発生し、
 この経路に入る限りElementは `dispose` されません。
-（引き取られずにフレーム末尾まで残ったElementがunmountされる仕組みはCh2で扱った通りです）
+（引き取られずにフレーム末尾まで残ったElementがunmountされる仕組みはChapter 2で扱った通りです）
 
 ---
 
-### P3: GlobalKeyの参照保持と配置先切り替え
+### Part 3: GlobalKeyの参照保持と配置先切り替え
 
-Ch2 P3 と同じ操作です。ここでは結果だけ整理します。
+Chapter 2 Part 3 と同じ操作です。ここでは結果だけ整理します。
 
-Ch2では「disposeが出ない」という事実をライフサイクルの観点から確認しました。この章では同じ現象を同一性管理の観点から見ます。`BuildOwner._globalKeyRegistry` がElement参照をアプリ全体で保持しているため、配置先の親が変わってもElementは同一であり続けます。P2のValueKeyが「同じ親のchildren内でのKey照合」であるのに対し、GlobalKeyは「アプリ全体のレジストリでのKey照合」という対比がここで完成します。
+Chapter 2では「disposeが出ない」という事実をライフサイクルの観点から確認しました。この章では同じ現象を同一性管理の観点から見ます。`BuildOwner._globalKeyRegistry` がElement参照をアプリ全体で保持しているため、配置先の親が変わってもElementは同一であり続けます。Part 2のValueKeyが「同じ親のchildren内でのKey照合」であるのに対し、GlobalKeyは「アプリ全体のレジストリでのKey照合」という対比がここで完成します。
 
 | タイミング | state hashCode | last event | dispose |
 | --- | --- | --- | --- |
@@ -164,9 +164,9 @@ Ch2では「disposeが出ない」という事実をライフサイクルの観�
 
 | シナリオ | 確認できたこと |
 | --- | --- |
-| P1: Keyなしで並べ替え | canUpdateはruntimeTypeのみで判定し、各位置のElementがそのまま再利用される。StateはlabelのKeyに追従せず、state hashCodeが位置に留まる |
-| P2: ValueKeyありで並べ替え | canUpdateがKey一致で判定し、ElementがlabelのKeyに追従して移動する。state hashCodeがlabelと一緒に移動し、同一性が維持される |
-| P3: GlobalKeyで配置先切り替え | GlobalKeyはアプリ全体のレジストリ（BuildOwner._globalKeyRegistry）にElement参照を保持する。配置先の親が変わってもdeactivate → activateのみ発生し、disposeは出ない |
+| Part 1: Keyなしで並べ替え | canUpdateはruntimeTypeのみで判定し、各位置のElementがそのまま再利用される。StateはlabelのKeyに追従せず、state hashCodeが位置に留まる |
+| Part 2: ValueKeyありで並べ替え | canUpdateがKey一致で判定し、ElementがlabelのKeyに追従して移動する。state hashCodeがlabelと一緒に移動し、同一性が維持される |
+| Part 3: GlobalKeyで配置先切り替え | GlobalKeyはアプリ全体のレジストリ（BuildOwner._globalKeyRegistry）にElement参照を保持する。配置先の親が変わってもdeactivate → activateのみ発生し、disposeは出ない |
 
 ---
 
