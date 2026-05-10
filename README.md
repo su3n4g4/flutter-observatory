@@ -40,3 +40,11 @@ Ch5: 依存             ─ 変化はどのElementまで伝播するか
 | Ch5 | [flutter_element_lab/lib/chapters/ch5/](flutter_element_lab/lib/chapters/ch5/) |
 
 検証に使うコアウィジェットは [flutter_element_lab/lib/widgets/state_tracker.dart](flutter_element_lab/lib/widgets/state_tracker.dart) です。
+
+## レビュー
+
+| ファイル | 内容 |
+|----------|------|
+| [review/review_sheet.md](review/review_sheet.md) | 記事・コードのレビューテンプレート（チェックリスト形式） |
+| [review/review_result.md](review/review_result.md) | Claude による1次レビュー結果（2026-05-11） |
+
