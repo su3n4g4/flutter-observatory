@@ -39,7 +39,7 @@ class Ch5CatalogPage extends StatelessWidget {
               const Ch5P1InheritedDependencyPage(),
             ),
             navButton(
-              'P2: Notificationの伝播',
+              'P2: Notificationのバブルアップ',
               const Ch5P2NotificationBubblePage(),
             ),
           ],

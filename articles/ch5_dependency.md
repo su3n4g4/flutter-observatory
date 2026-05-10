@@ -24,7 +24,7 @@ Flutterはこれを2つの仕組みで解決します。
 
 mountされた各Elementは、Widget本体のツリー（親子関係）とは別に、2系統の補助構造を保持しています。
 
-- **`_inheritedWidgets`**：祖先のInheritedElementを型で引くためのマップ
+- **`_inheritedElements`**：祖先のInheritedElementを型で引くためのマップ
 - **`_notificationTree`**：祖先の`NotificationListener`を辿るための連結リスト
 
 どちらもmountのタイミングで親から引き継いで構築されます。違いは「自分自身がそこに登場するかどうか」であり、これがそのまま2つの経路の性格を決めています。
@@ -37,7 +37,7 @@ InheritedWidgetは「スコープの公開」と「差分判定」を担いま�
 #### mount時：祖先の索引化
 
 Elementがmountされる際に、任意のElementが祖先のInheritedWidgetを型名で引けるよう、下記の流れでマップを作成します。
-- 親の_inheritedWidgetsマップ（`Type` → `InheritedElement`）をコピーする
+- 親の_inheritedElementsマップ（`Type` → `InheritedElement`）をコピーする
 - `InheritedElement`の場合のみ、コピーしたマップに自分自身を追加する
 - 更新済みのマップを子に渡す
 
@@ -176,7 +176,7 @@ void dispatchNotification(Notification notification) {
 
 | 観点 | InheritedWidget | Notification |
 | --- | --- | --- |
-| mount時に作られる構造 | `_inheritedWidgets`（祖先の型索引） | `_notificationTree`（Listenerの連結リスト） |
+| mount時に作られる構造 | `_inheritedElements`（祖先の型索引） | `_notificationTree`（Listenerの連結リスト） |
 | 「rebuild対象」としての登録 | あり（build時に`_dependents`へ追加） | なし |
 | 通知先の決まり方 | build()の実行履歴で動的に決まる | ツリー構造で静的に決まる |
 | 通知それ自体がrebuildを起こすか | はい（`markNeedsBuild`を直接呼ぶ） | いいえ（`setState`を呼ぶかは捕捉側次第） |
