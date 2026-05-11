@@ -8,16 +8,6 @@ FlutterのElementツリーが持つ5つの責務を、検証画面を動かし�
 
 ▶ https://su3n4g4.github.io/flutter-element-lab/
 
-## 構成
-
-```
-Ch1: 構造と位置（空間）─ Elementはどこにいるか
-Ch2: 状態の変遷（時間）─ Elementはいつ生き、いつ死ぬか
-Ch3: 同一性           ─ ElementはどのWidgetと対応するか
-Ch4: 再構築           ─ buildはいつ・何回実行されるか
-Ch5: 依存             ─ 変化はどのElementまで伝播するか
-```
-
 ## 記事
 
 | 章 | タイトル | ファイル |
