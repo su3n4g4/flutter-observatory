@@ -27,10 +27,8 @@ class _Ch2P3GlobalKeyMovePageState extends State<Ch2P3GlobalKeyMovePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              '観測したいこと：\n'
-              '- 上下スロットを切り替えても State(state=xxxx) が同一のまま\n'
-              '- dispose が出ない\n'
-              '- deactivate -> activate が出ることがある',
+              'ボタンで StateTracker を上下のスロットに切り替えてください。\n'
+              '切り替えても state id が変わらず、dispose が出ないことを確認します。',
             ),
             const SizedBox(height: 12),
             FilledButton(
@@ -48,12 +46,6 @@ class _Ch2P3GlobalKeyMovePageState extends State<Ch2P3GlobalKeyMovePage> {
               child: putInTopSlot ? const SizedBox.shrink() : keyedProbe(),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'ログの見方：\n'
-              '1) 最初に initState/build が出る\n'
-              '2) 切り替えで deactivate/activate/build が出る（dispose は出ない）\n'
-              '3) state= の値（hashCode）が変わらないことを確認',
-            ),
           ],
         ),
       ),

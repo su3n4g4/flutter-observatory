@@ -23,8 +23,7 @@ class _P3MoveParentPageState extends State<P3MoveParentPage> {
         child: Column(
           children: [
             const Text(
-              '同じ StateTracker("P") を Left / Right の親ボックス間で移動させます。\n'
-              '親が変わるたびに dispose → initState が呼ばれることを確認してください。',
+              '同じ StateTracker("P") を Left / Right の親ボックス間で移動させます。',
             ),
             const SizedBox(height: 16),
             FilledButton.icon(

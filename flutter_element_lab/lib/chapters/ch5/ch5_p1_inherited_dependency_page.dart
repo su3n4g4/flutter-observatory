@@ -14,19 +14,10 @@ class Ch5P1InheritedDependencyPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height: 12),
             const Text(
-              '💡 枠が黄色く光る = build() が実行された証拠',
-              style: TextStyle(fontSize: 13, color: Colors.black54),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'この章で確認すること',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              '・dependOn を呼んだ Element だけが InheritedWidget 更新時に rebuild される\n'
-              '・依存登録していない Element は rebuild されない（枠が光らない）',
+              'ボタンを押して、どちらの枠が光るかを確認してください。\n'
+              'of() を呼んでいる Widget だけが rebuild されます。',
               style: TextStyle(fontSize: 13),
             ),
             const Divider(height: 24),
@@ -42,20 +33,6 @@ class Ch5P1InheritedDependencyPage extends StatelessWidget {
                   _IndependentWidget(),
                 ],
               ),
-            ),
-
-            const SizedBox(height: 16),
-            const Text(
-              '起きる現象',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              '・ボタンを押すと _DependencyScope の value だけが変わる\n'
-              '・_DependencyScope.updateShouldNotify が true を返す\n'
-              '・of() を呼んでいた _DependentWidget だけ rebuild（光る）\n'
-              '・_IndependentWidget は rebuild されない（光らない）',
-              style: TextStyle(fontSize: 13),
             ),
           ],
         ),

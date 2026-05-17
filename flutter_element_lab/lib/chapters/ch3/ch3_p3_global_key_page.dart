@@ -26,16 +26,23 @@ class _Ch3P3GlobalKeyPageState extends State<Ch3P3GlobalKeyPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const Text(
+              'ボタンで StateTracker を上下のスロットに切り替えてください。\n'
+              'Element の hashCode と depth が変わらないことを確認します。',
+            ),
+            const SizedBox(height: 12),
             FilledButton(
               onPressed: () => setState(() => putInTopSlot = !putInTopSlot),
               child: const Text('上下スロットを切り替える'),
             ),
             const SizedBox(height: 12),
+            const Divider(height: 24),
+            const SizedBox(height: 12),
             Text(
               'currentElement.hashCode: ${currentElement?.hashCode}\n'
               'currentElement.depth: ${currentElement?.depth}',
             ),
-            const Divider(height: 24),
+            const SizedBox(height: 12),
             _Slot(
               title: 'Top Slot',
               child: putInTopSlot ? keyedTracker : const SizedBox.shrink(),

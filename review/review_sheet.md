@@ -210,7 +210,7 @@ Stateの生死はElementが決める。Elementがツリーにマウントされ�
 - [ ] P2のNavigator push/popで正しくinitState/disposeが発火するか
 - [ ] P3のGlobalKeyで「上下スロットを切り替える」操作時にdisposeが出ず、activateが出るか
 - [ ] StateTrackerのラベル名が記事の表記と一致しているか（'IF-CHILD'、'PUSHED-PAGE-CHILD'、'GLOBAL-KEYED'）
-- [ ] ボタン名（「子を消す（if=false）」「子を戻す（if=true）」「上下スロットを切り替える」等）が記事の記述と一致しているか
+- [ ] ボタン名（「StateTrackerを消す（if=false）」「StateTrackerを戻す（if=true）」「上下スロットを切り替える」等）が記事の記述と一致しているか
 
 **コメント・指摘事項（Ch2）**
 

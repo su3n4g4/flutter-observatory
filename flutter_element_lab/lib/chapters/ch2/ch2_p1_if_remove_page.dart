@@ -21,19 +21,18 @@ class _Ch2P1IfRemovePageState extends State<Ch2P1IfRemovePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              '操作：ボタンで if を切り替え。\n'
-              '観測：ツリーから外れると dispose が呼ばれる。',
+              'StateTrackerの表示を切り替え。',
             ),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () => setState(() => showChild = !showChild),
-              child: Text(showChild ? '子を消す（if=false）' : '子を戻す（if=true）'),
+              child: Text(showChild ? 'StateTrackerを消す（if=false）' : 'StateTrackerを戻す（if=true）'),
             ),
             const Divider(height: 32),
             if (showChild)
               const StateTracker('IF-CHILD')
             else
-              const Text('いま子はツリーに存在しません（ここで dispose が出る）'),
+              const Text('StateTrackerが非表示になりました'),
           ],
         ),
       ),

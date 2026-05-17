@@ -61,16 +61,8 @@ class _Ch4P1RebuildSchedulingPageState extends State<Ch4P1RebuildSchedulingPage>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'この章で説明すること\n'
-              '- setState は build を直接呼ばない\n'
-              '- Element は dirty マークを付けて BuildOwner に登録される',
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              '照合コード\n'
-              '- Element.markNeedsBuild\n'
-              '- BuildOwner.scheduleBuildFor\n'
-              '- WidgetsBinding.drawFrame',
+              '各ボタンを押してログを確認してください。\n'
+              'setState を何回呼んでも build は1フレームにまとめて実行されます。',
             ),
             const SizedBox(height: 16),
             FilledButton(
@@ -93,13 +85,6 @@ class _Ch4P1RebuildSchedulingPageState extends State<Ch4P1RebuildSchedulingPage>
                 const SizedBox(height: 8),
                 StateTracker('child-B'),
               ],
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              '観測ポイント\n'
-              '- setState を何回呼んでも build はフレームでまとめて実行される\n'
-              '- build の順序はツリー構造（親→子）に従う\n'
-              '- 実行順はデバッグコンソールの [BUILD]/[FRAME] ログで確認する',
             ),
           ],
         ),
