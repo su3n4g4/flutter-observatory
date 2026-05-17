@@ -19,7 +19,7 @@ class RootCatalogPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('章を選択してください。'),
+            const Text('Chapterを選択してください。'),
             const SizedBox(height: 16),
             const NavButton(title: 'Chapter 1: Elementツリーの位置管理', page: Ch1CatalogPage()),
             const NavButton(title: 'Chapter 2: Stateのライフサイクル管理', page: Ch2CatalogPage()),

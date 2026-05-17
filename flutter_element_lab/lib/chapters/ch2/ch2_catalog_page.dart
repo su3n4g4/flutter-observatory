@@ -17,7 +17,7 @@ class Ch2CatalogPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('目的：Element が State の生成/更新/破棄を管理する事実を観測する。'),
+            const Text('Partを選択してください'),
             const SizedBox(height: 16),
             const NavButton(title: 'Part 1: if で消す（dispose）', page: Ch2P1IfRemovePage()),
             const NavButton(title: 'Part 2: Navigator push/pop', page: Ch2P2NavigatorPage()),
