@@ -15,7 +15,7 @@ class Ch4CatalogPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('目的：再構築スケジューリングを確認し、dirty 登録と frame 単位の rebuild を確認する。'),
+            const Text('Partを選択してください'),
             const SizedBox(height: 16),
             const NavButton(title: 'Part 1: setState と再構築スケジューリング', page: Ch4P1RebuildSchedulingPage()),
           ],

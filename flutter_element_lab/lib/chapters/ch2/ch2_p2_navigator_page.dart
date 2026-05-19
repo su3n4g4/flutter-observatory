@@ -14,8 +14,9 @@ class Ch2P2NavigatorPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              '操作：push で次画面へ、pop で戻る。\n'
-              '観測：pop すると次画面ツリーが unmount され dispose が呼ばれる。',
+              '次の画面に移動し、戻るボタンで戻ってください。\n'
+              '戻ったときのログに dispose が出ます。\n'
+              'この画面の State は push 後も生きています。ログに dispose が出ないことで確認できます。',
             ),
             const SizedBox(height: 12),
             FilledButton(
@@ -25,11 +26,6 @@ class Ch2P2NavigatorPage extends StatelessWidget {
                 );
               },
               child: const Text('Navigator.push（次画面へ）'),
-            ),
-            const Divider(height: 32),
-            const Text(
-              '注：このページのウィジェットは push では破棄されない。\n'
-              '（前面から外れるだけで、Route は残る）',
             ),
           ],
         ),
@@ -75,16 +71,17 @@ class _PushedPageState extends State<_PushedPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'この画面は pop で破棄される（unmount→dispose）。\n'
-              '下の Probe の dispose も確認する。',
+              'Navigator.pop（戻る）ボタンを押すと、この画面と StateTracker の両方が破棄されます。\n'
+              'ログに deactivate → dispose の順で出ることを確認してください。',
             ),
-            const SizedBox(height: 12),
-            const StateTracker('PUSHED-PAGE-CHILD'),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Navigator.pop（戻る）'),
             ),
+            const Divider(height: 32),
+            const StateTracker('PUSHED-PAGE-CHILD'),
+            const SizedBox(height: 12),
           ],
         ),
       ),

@@ -16,7 +16,7 @@ class Ch5CatalogPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('目的：依存関係と通知バブルアップの挙動を確認する。'),
+            const Text('Partを選択してください'),
             const SizedBox(height: 16),
             const NavButton(title: 'Part 1: InheritedWidget 依存', page: Ch5P1InheritedDependencyPage()),
             const NavButton(title: 'Part 2: Notificationのバブルアップ', page: Ch5P2NotificationBubblePage()),

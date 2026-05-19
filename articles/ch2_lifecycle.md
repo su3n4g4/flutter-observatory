@@ -25,7 +25,7 @@ build: IF-CHILD  state=437281950  depth=6  widgetType=StateTracker  element=Stat
 
 Elementがツリーにマウントされ、Stateが生成されました（initState）。ここがStateの誕生地点です。
 
-**② 「子を消す（if=false）」ボタン押下**
+**② 「StateTrackerを消す（if=false）」ボタン押下**
 
 ボタンを押します。StateTracker('IF-CHILD')が画面から消えます。
 
@@ -36,7 +36,7 @@ dispose: IF-CHILD  state=437281950
 
 deactivateの直後にdisposeが呼ばれました。Elementがツリーから外れると、そのElementが管理していたStateも一緒に破棄されます。
 
-**③ 「子を戻す（if=true）」ボタン押下**
+**③ 「StateTrackerを戻す（if=true）」ボタン押下**
 
 もう一度ボタンを押します。StateTracker('IF-CHILD')が再び表示されます。
 

@@ -30,23 +30,11 @@ class _Ch5P2NotificationBubblePageState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              '💡 枠が黄色く光る = build() が実行された証拠',
-              style: TextStyle(fontSize: 13, color: Colors.black54),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'この章で確認すること',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              '・Notification.dispatch はツリーを子から親へバブルアップする\n'
-              '・NotificationListener がバブルアップしてきた通知を捕捉する\n'
-              '・捕捉側で setState を呼ぶとページ全体が rebuild される（= Part 1 との対比）',
+              'ボタンを押して、どの枠が光るかを確認してください。\n'
+              'Part 1 と違い、通知に関与していない Widget も含めてすべて rebuild されます。',
               style: TextStyle(fontSize: 13),
             ),
             const Divider(height: 24),
-
             // ページ
             LayerLabel('ページ', color: Color(0xFF1976D2)),
             WidgetBox(
@@ -79,21 +67,6 @@ class _Ch5P2NotificationBubblePageState
                   ),
                 ],
               ),
-            ),
-
-            const SizedBox(height: 16),
-            const Text(
-              '起きる現象',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              '・ボタン押下で末端から Notification.dispatch\n'
-              '・ツリーを上へバブルアップし NotificationListener が捕捉\n'
-              '・onNotification 内で setState → Page が rebuild\n'
-              '・Page の子（dispatch Leaf も Independent も）すべて rebuild される\n'
-              '・P1 と違い「依存登録」に基づく選択的 rebuild ではない',
-              style: TextStyle(fontSize: 13),
             ),
           ],
         ),

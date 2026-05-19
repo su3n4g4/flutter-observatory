@@ -19,7 +19,7 @@ class Ch1CatalogPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              '目的：Elementツリーが管理する「親子・位置(slot/index)・生死」を観測で確定する。',
+              'Partを選択してください',
             ),
             const SizedBox(height: 16),
             const NavButton(title: 'Part 1: 並べ替え（Keyなし）', page: P1ReorderNoKeyPage()),
