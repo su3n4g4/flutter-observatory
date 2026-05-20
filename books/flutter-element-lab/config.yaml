@@ -1,0 +1,14 @@
+title: "FlutterのElementツリーを理解する"
+summary: "Widgetを書いているつもりでも、実際にツリーを動かしているのはElementです。本シリーズでは、ソースコードと実測ログをもとにその内部動作を確かめていきます。"
+topics:
+  - Flutter
+  - Dart
+published: false
+price: 0
+chapters:
+  - ch0_preface
+  - ch1_position
+  - ch2_lifecycle
+  - ch3_identity
+  - ch4_rebuild
+  - ch5_dependency

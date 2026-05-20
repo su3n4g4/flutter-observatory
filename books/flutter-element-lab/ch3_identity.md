@@ -1,0 +1,244 @@
+---
+title: "Chapter 3: 同一性管理（Key）"
+---
+
+▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-element-lab/tree/main/flutter_element_lab/lib/chapters/ch3)　▶ [検証画面](https://su3n4g4.github.io/flutter-element-lab/)
+
+## この章で確かめること
+
+FlutterはどうやってElementの同一性を判断するのか？
+
+## 前提知識
+
+検証に入る前に、同一性を判断する際のロジックを確認していきます。
+
+### canUpdate の判定ロジック
+
+リビルド時、FlutterはElementを再利用できるかどうかを `Widget.canUpdate` で判定します。
+
+判定基準は `runtimeType（ウィジェットのクラス）` と `key` の2つで、両方が一致する場合のみ既存のElementが再利用されます。一致しない場合は古いElementを破棄し、新しいElementを生成します。
+
+```dart
+// packages/flutter/lib/src/widgets/framework.dart
+static bool canUpdate(Widget oldWidget, Widget newWidget) {
+  return oldWidget.runtimeType == newWidget.runtimeType
+      && oldWidget.key == newWidget.key;
+}
+```
+
+Key照合が有効な範囲はKeyの種類によって異なり、その差が同一性判断の有効範囲を決めます。
+この章ではkeyを利用しない場合とそれぞれのkeyを利用した場合にどうなるのかを検証していきます。
+
+### Keyの種類と同一性の有効範囲
+
+|  | Keyなし | LocalKey（ValueKeyなど） | GlobalKey |
+| --- | --- | --- | --- |
+| canUpdateの式 | null == null → true（型一致のみ） | runtimeType一致 && Key一致 | runtimeType一致 && Key一致 |
+| Key比較の解決スコープ | なし | 親Elementのchildren内 | BuildOwner._globalKeyRegistry（アプリ全体） |
+| 同一性の有効範囲 | 同じ位置 | 同じ親の兄弟間 | アプリ全体 |
+| 登録場所 | なし | 同じ親を持つ兄弟Element間 | BuildOwner._globalKeyRegistry |
+| 親をまたいだ移動 | 不可（破棄＆再生成） | 不可（破棄＆再生成） | 可（deactivate→activate） |
+| dispose発生 | 位置がずれると発生 | 親が変わると発生 | 発生しない（移動時） |
+| 同時に2箇所に配置 | 可 | 可 | 不可（エラー） |
+| 典型的な用途 | 静的・順不同なリスト | 並び替えあるリスト | フォーム参照・ツリー間移動 |
+
+---
+
+## Part 1: Keyなしで並べ替え
+
+Chapter 1 Part 1 と同じ操作です。ここでは結果だけ整理します。
+
+Chapter 1では「Elementは位置に紐づく」という位置管理の観点から確認しました。この章では同一性管理の観点から見ます。Keyがない場合、`canUpdate` はruntimeTypeのみで判定するため、Elementの同一性は位置で決まります。これがPart 2（ValueKey）との対比基準となります。
+
+| 操作後の表示位置 | label | state hashCode |
+| --- | --- | --- |
+| 1行目 | C（移動） | 997303568（変化なし） |
+| 2行目 | B（不変） | 545823583 |
+| 3行目 | A（移動） | 1040413516（変化なし） |
+
+**確認できたこと：** Keyがない場合、Stateは位置に留まりlabelに追従しません。
+
+---
+
+## Part 2: ValueKeyありで並べ替え
+
+**① 初期表示**
+
+画面を開きます。ValueKey付きStateTracker が A・B・C の順に表示されます。
+
+```
+initState: A  state=110179758
+build: A  state=110179758  depth=153  widgetType=StateTracker  element=StatefulElement
+initState: B  state=520698145
+build: B  state=520698145  depth=153  widgetType=StateTracker  element=StatefulElement
+initState: C  state=277223098
+build: C  state=277223098  depth=153  widgetType=StateTracker  element=StatefulElement
+```
+
+**② Reverseボタン押下**
+
+「Reverse」ボタンを押します。表示がC・B・Aに入れ替わります。
+
+```
+didUpdateWidget: C -> C  state=277223098
+build: C  state=277223098  depth=153  widgetType=StateTracker  element=StatefulElement
+didUpdateWidget: B -> B  state=520698145
+build: B  state=520698145  depth=153  widgetType=StateTracker  element=StatefulElement
+didUpdateWidget: A -> A  state=110179758
+build: A  state=110179758  depth=153  widgetType=StateTracker  element=StatefulElement
+```
+
+各位置に何が起きたかを整理します。
+
+| 操作後の表示位置 | label | state hashCode |
+| --- | --- | --- |
+| 1行目 | C | 277223098（Cと一緒に移動） |
+| 2行目 | B | 520698145 |
+| 3行目 | A | 110179758（Aと一緒に移動） |
+
+**確認できたこと：** ValueKeyがある場合、`canUpdate` は親のchildren内でKey一致するElementを探して再利用します。
+StateはlabelのKeyに紐づいているため、表示位置が変わっても state hashCode がlabelと一緒に移動します。
+Part 1との対比でKeyの有無が何を変えるかが明確になります。
+
+---
+
+## Part 3: GlobalKeyの参照保持と配置先切り替え
+
+### 前提：GlobalKeyのレジストリと引き取り
+
+GlobalKeyの `canUpdate` 自体はValueKeyと同じ式となります。
+違うのはKeyの比較が行われるスコープで、ValueKeyが同じ親を持つ兄弟Element間で照合されるのに対し、
+GlobalKeyは `BuildOwner` が保持するレジストリで照合されます。
+
+```dart
+// packages/flutter/lib/src/widgets/framework.dart
+class BuildOwner {
+  final Map<GlobalKey, Element> _globalKeyRegistry = <GlobalKey, Element>{};
+}
+```
+
+このMapはGlobalKeyとElementを1対1で対応しています。
+Elementがマウントされる際に自身をこのレジストリに登録し、unmount時に削除を行います。
+「同じGlobalKeyを同時に2箇所に配置できない」という制約は、このデータ構造が1対1であることから来ています。
+
+新しい位置にGlobalKey付きWidgetが現れたとき、
+`inflateWidget` はレジストリから既存Elementを取り出し、新しい位置で再アクティブ化する分岐に入ります。
+
+```dart
+// packages/flutter/lib/src/widgets/framework.dart
+// debug用のコードを削除したコード
+Element inflateWidget(Widget newWidget, Object? newSlot) {
+  final Key? key = newWidget.key;
+  if (key is GlobalKey) {
+    final Element? newChild = _retakeInactiveElement(key, newWidget);
+    if (newChild != null) {
+      newChild._activateWithParent(this, newSlot);
+      return newChild;
+    }
+  }
+  // 通常のcreateElement経路
+  ...
+}
+```
+
+再アクティブ化されたElementでは `active → inactive → active` の状態遷移（`deactivate()` → `activate()` の順で呼ばれる）が発生し、
+この経路に入る限りElementは `dispose` されません。
+（再アクティブ化されずにフレーム末尾まで残ったElementがunmountされる仕組みはChapter 2で扱った通りです）
+
+---
+
+### 検証: GlobalKeyの参照保持と配置先切り替え
+
+Chapter 2 Part 3 と同じ操作です。ここでは結果だけ整理します。
+
+Chapter 2では「disposeが出ない」という事実をライフサイクルの観点から確認しました。この章では同じ現象を同一性管理の観点から見ます。`BuildOwner._globalKeyRegistry` がElement参照をアプリ全体で保持しているため、配置先の親が変わってもElementは同一であり続けます。Part 2のValueKeyが「同じ親のchildren内でのKey照合」であるのに対し、GlobalKeyは「アプリ全体のレジストリでのKey照合」という対比がここで完成します。
+
+| タイミング | state hashCode | last event | dispose |
+| --- | --- | --- | --- |
+| Top Slot配置中 | 31115166 | activate | なし |
+| Bottom Slotへ切り替え | 31115166（不変） | activate | なし |
+| Top Slotへ戻す | 31115166（不変） | activate | なし |
+
+**確認できたこと：** GlobalKeyは照合スコープがアプリ全体のレジストリであるため、配置先の親が変わってもElementの同一性が維持されます。`deactivate → activate` のサイクルのみが発生し、disposeは出ません。
+
+---
+
+## 検証結果まとめ
+
+| シナリオ | 確認できたこと |
+| --- | --- |
+| Part 1: Keyなしで並べ替え | canUpdateはruntimeTypeのみで判定し、各位置のElementがそのまま再利用される。StateはlabelのKeyに追従せず、state hashCodeが位置に留まる |
+| Part 2: ValueKeyありで並べ替え | canUpdateがKey一致で判定し、ElementがlabelのKeyに追従して移動する。state hashCodeがlabelと一緒に移動し、同一性が維持される |
+| Part 3: GlobalKeyで配置先切り替え | GlobalKeyはアプリ全体のレジストリ（BuildOwner._globalKeyRegistry）にElement参照を保持する。配置先の親が変わってもdeactivate → activateのみ発生し、disposeは出ない |
+
+---
+
+## 実装時に気をつけること
+
+### Keyなし運用の許容範囲
+
+Keyなしが問題になるのは「順序や数が動的に変わる」場合に限られます。
+以下の条件がすべて満たせる場合、Keyなしで運用できます。
+
+- リストの順序が変わらない
+- 条件付き表示による挿入・削除が起きない（またはStatelessWidgetのみ）
+- 各項目のStateが他の項目と混在しても支障がない
+
+逆に言えば、StatefulWidgetを動的なリストに並べる時点でValueKeyは原則必要と考えたほうがよいでしょう。
+Keyなしの不具合はログに出づらく、UIの見た目だけが静かに壊れます。
+
+### ValueKeyの採用条件
+
+ValueKeyに渡す値は項目を一意に識別できるものでなければなりません。
+インデックス（`ValueKey(index)`）は並び替えに対して無意味なため、
+IDや名前など項目固有の値を使います。
+
+```dart
+// NG：インデックスはKeyとして機能しない
+ListView.builder(
+  itemBuilder: (context, i) => ItemWidget(key: ValueKey(i), ...),
+)
+
+// OK：項目固有のIDを使う
+ListView.builder(
+  itemBuilder: (context, i) => ItemWidget(key: ValueKey(items[i].id), ...),
+)
+```
+
+また、ValueKeyは同じ親の兄弟間でのみ有効です。
+親をまたいだ同一性の維持が必要な場合はGlobalKeyを検討してください。
+
+### GlobalKeyの採用条件と制約
+
+GlobalKeyは強力ですが、採用前に以下を確認してください。
+
+採用が正当化されるケース：
+
+- ツリー間でElementを移動させる必要がある（ドラッグ＆ドロップなど）
+- 別Widget階層からStateのメソッドやBuildContextを参照する必要がある
+
+制約：
+
+- 同じKeyを同時に2箇所に配置できない（_registryに1対1で登録されるため）
+- `const`コンストラクタと併用できない
+- rebuildのたびに生成してはいけない（フィールドで保持する）
+
+```dart
+// NG：buildメソッド内で生成するとframeごとに新しいKeyになる
+Widget build(BuildContext context) {
+  return StateTracker(key: GlobalKey(), ...); // 毎回別インスタンス
+}
+
+// OK：フィールドで保持する
+class _MyWidgetState extends State<MyWidget> {
+  final _key = GlobalKey();
+  ...
+}
+```
+
+### 設計の優先順位
+
+Keyなし → ValueKey → GlobalKey
+
+GlobalKeyは「最後の手段」として位置づけます。
+多くの場合、GlobalKeyで解決しようとしている問題は、状態の持ち方やWidget構造の見直しで回避できます。
