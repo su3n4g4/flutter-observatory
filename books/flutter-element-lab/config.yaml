@@ -6,9 +6,9 @@ topics:
 published: true
 price: 0
 chapters:
-  - ch0_preface
+  - ch0_element_preface
   - ch1_position
   - ch2_lifecycle
   - ch3_identity
-  - ch4_rebuild
+  - ch4_element_rebuild
   - ch5_dependency
