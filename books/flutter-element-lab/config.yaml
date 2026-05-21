@@ -3,7 +3,7 @@ summary: "Widgetを書いているつもりでも、実際にツリーを動か�
 topics:
   - Flutter
   - Dart
-published: false
+published: true
 price: 0
 chapters:
   - ch0_preface
