@@ -331,7 +331,7 @@ void buildScope(Element context, [VoidCallback? callback]) {
 }
 ```
 
-前提の「全体の流れ」と照らし合わせます。
+処理の流れと実際のログを照らし合わせます。
 
 | 実行処理 | 実際のログ |
 | --- | --- |
