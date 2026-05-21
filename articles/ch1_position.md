@@ -1,3 +1,11 @@
+---
+title: "【Flutter Element深掘り】Chapter 1: Elementツリーの位置管理"
+emoji: "📍"
+type: "tech"
+topics: ["Flutter", "Dart"]
+published: false
+---
+
 # Chapter 1: Elementツリーの位置管理
 
 ▶ [検証コード（GitHub）](https://github.com/su3n4g4/flutter-element-lab/tree/main/flutter_element_lab/lib/chapters/ch1)　▶ [検証画面](https://su3n4g4.github.io/flutter-element-lab/)

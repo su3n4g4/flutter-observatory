@@ -1,3 +1,11 @@
+---
+title: "FlutterのElementツリーを理解する"
+emoji: "🌱"
+type: "tech"
+topics: ["Flutter", "Dart"]
+published: false
+---
+
 # FlutterのElementツリーを理解する
 
 Widgetを書いているつもりでも、実際にツリーを動かしているのはElementです。本シリーズでは、ソースコードと実測ログをもとにその内部動作を確かめていきます。
