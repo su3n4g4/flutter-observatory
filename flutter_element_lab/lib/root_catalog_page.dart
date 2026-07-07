@@ -45,22 +45,22 @@ class RootCatalogPage extends StatelessWidget {
               title: 'Chapter 5: 依存と通知の管理',
               page: Ch5CatalogPage(),
             ),
-            const NavButton(
-              title: 'Chapter 6: Stateをどこに置くか',
-              page: Ch6CatalogPage(),
-            ),
-            const NavButton(
-              title: 'Chapter 7: rebuildの責任をどう分割するか',
-              page: Ch7CatalogPage(),
-            ),
-            const NavButton(
-              title: 'Chapter 8: 同一性をどう守るか',
-              page: Ch8CatalogPage(),
-            ),
-            const NavButton(
-              title: 'Chapter 9: 依存をどう伝播させるか',
-              page: Ch9CatalogPage(),
-            ),
+            // const NavButton(
+            //   title: 'Chapter 6: Stateをどこに置くか',
+            //   page: Ch6CatalogPage(),
+            // ),
+            // const NavButton(
+            //   title: 'Chapter 7: rebuildの責任をどう分割するか',
+            //   page: Ch7CatalogPage(),
+            // ),
+            // const NavButton(
+            //   title: 'Chapter 8: 同一性をどう守るか',
+            //   page: Ch8CatalogPage(),
+            // ),
+            // const NavButton(
+            //   title: 'Chapter 9: 依存をどう伝播させるか',
+            //   page: Ch9CatalogPage(),
+            // ),
           ],
         ),
       ),
